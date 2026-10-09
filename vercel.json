@@ -1,4 +1,4 @@
 {
   "outputDirectory": "public",
-  "functions": { "api/sample.js": { "maxDuration": 60 } }
+  "functions": { "api/prices.js": { "maxDuration": 30 } }
 }

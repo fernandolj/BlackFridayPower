@@ -1,21 +1,37 @@
 # Black Friday Power
 
-A dark, mobile-friendly Black Friday wishlist: add items, see estimated current / lowest / highest prices and a 12-month history, move items to Must Buy or Bought, and keep several lists.
+A dark, mobile-friendly Black Friday wishlist. Search an item and the site asks several store APIs at the same time, then shows each store's current price with a direct link to the product, the cheapest store, and the time the prices were pulled. Items can move between Watch, Must Buy and Bought lists.
 
 ## Deploy on Vercel
 
-1. Go to https://vercel.com/new and import this GitHub repository.
-2. Leave the framework preset as **Other**. No build command is needed (`vercel.json` serves the `public` folder and the `api` function).
-3. Under **Environment Variables**, add `ANTHROPIC_API_KEY` (from https://console.anthropic.com). Optional: `ANTHROPIC_MODEL` to override the default model.
-4. Click **Deploy**.
+1. Import this repository at https://vercel.com/new (framework preset: **Other**, no build command).
+2. Under **Settings > Environment Variables**, add the keys for the stores you want. Every key is optional; a store with no key is skipped.
+3. Deploy (or redeploy after adding keys).
+
+## Store APIs
+
+| Store | Environment variables | Where to get them | Cost |
+|---|---|---|---|
+| Best Buy | `BESTBUY_API_KEY` | https://developer.bestbuy.com | Free key |
+| eBay | `EBAY_CLIENT_ID`, `EBAY_CLIENT_SECRET` | https://developer.ebay.com (create a keyset) | Free; daily call limits apply |
+| Walmart and Amazon | `SERPAPI_KEY` | https://serpapi.com | 250 free searches a month, then paid. One lookup uses 2 searches. |
+
+Not included, and why:
+- **Amazon's own API** needs an approved Associates account with 10 qualifying sales in 30 days.
+- **Walmart's own API** is approval-only for affiliates and sellers.
+- **Target** has no public product API. Its website's internal API is against its terms of use.
+
+Target, Newegg, B&H, Apple and Costco still get a link to that store's search results.
 
 ## How it works
 
-- `public/index.html` is the whole app. Lists are saved in the browser (localStorage) when hosted.
-- `api/sample.js` is a serverless function that asks Claude for the product estimate (prices, history, description, icon).
+- `public/index.html` is the whole app. Lists are saved in the browser (localStorage).
+- `api/prices.js` is a serverless function that queries every configured store at once and returns the best match from each. The match is each store's top search result, so check the title on the store page.
 
-## Limits to know about
+## Limits
 
-- Prices, history and links are **Claude's estimates, not live store data**. Links open each store's search results. Exact prices and direct product pages need a retailer or price-data API.
-- Hosted lists live in each person's own browser, so they are not shared across devices or with other people. Sharing and sync need a database and sign-in.
-- The lookup endpoint is public and uses your API key; add rate limiting or sign-in before sharing the URL widely.
+- No price history yet. "Lowest seen" and "Highest seen" compare the stores' prices on the day you searched. Real history needs a database and a scheduled daily job.
+- Prices are only as fresh as the last search. There is no automatic daily refresh yet.
+- Lists are per browser, not shared across devices or people.
+- The price endpoint is public and uses your API quotas. Add rate limiting before sharing the link widely.
+- Best Buy's terms allow only temporary caching of its data, so check them before storing its prices.
