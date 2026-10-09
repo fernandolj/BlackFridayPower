@@ -1,0 +1,4 @@
+{
+  "outputDirectory": "public",
+  "functions": { "api/sample.js": { "maxDuration": 60 } }
+}

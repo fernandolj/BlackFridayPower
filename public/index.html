@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Black Friday Power</title>
+<style>
+:root{--bg:#14110f;--card:#1e1a17;--line:#322b26;--tx:#f1e9e1;--mut:#9a8d82;--ac:#f2a24b;--ac2:#3a2a17;--ok:#7bc88f;--bad:#e5806b;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:light){:root:not([data-theme="dark"]){--bg:#faf6f1;--card:#fff;--line:#e6dcd0;--tx:#2a221b;--mut:#7d6f62;--ac:#c9710f;--ac2:#fbebd6;--ok:#2f8a4a;--bad:#c0462f}}
+:root[data-theme="light"]{--bg:#faf6f1;--card:#fff;--line:#e6dcd0;--tx:#2a221b;--mut:#7d6f62;--ac:#c9710f;--ac2:#fbebd6;--ok:#2f8a4a;--bad:#c0462f}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:760px;margin:0 auto;padding:20px 16px 60px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{margin:0;font-size:26px;letter-spacing:-.5px}h1 span{color:var(--ac)}
+.sub{color:var(--mut);font-size:13px}
+.cd{text-align:right}.cd b{display:block;font-size:24px;color:var(--ac)}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.stat b{display:block;font-size:20px}.stat small{color:var(--mut)}
+.alert{background:var(--ac2);border:1px solid var(--ac);border-radius:12px;padding:12px 14px;margin-bottom:16px}
+.alert b{color:var(--ac)}.alert div{margin-top:6px;display:flex;justify-content:space-between;gap:8px;align-items:center}
+form.add{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+form.add .w{grid-column:1/-1}
+input,select{background:var(--bg);color:var(--tx);border:1px solid var(--line);border-radius:9px;padding:9px 10px;font:inherit;width:100%;min-width:0}
+input:focus,select:focus{outline:2px solid var(--ac);outline-offset:-1px}
+button{font:inherit;cursor:pointer;border-radius:9px;border:1px solid var(--line);background:transparent;color:var(--tx);padding:8px 12px}
+button:hover{border-color:var(--ac)}button.p{background:var(--ac);color:#1b130a;border-color:var(--ac);font-weight:600}
+.tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto}
+.tabs button{border-radius:99px;white-space:nowrap}.tabs button.on{background:var(--ac2);border-color:var(--ac);color:var(--ac)}
+.item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:10px}
+.item.hot{border-color:var(--ac)}
+.top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.top h3{margin:0;font-size:16px}.top a{color:var(--mut);font-size:12px}
+.badge{font-size:11px;font-weight:600;padding:3px 8px;border-radius:99px;background:var(--ac);color:#1b130a;white-space:nowrap}
+.badge.g{background:var(--ok)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}
+.grid div{font-size:12px;color:var(--mut)}.grid b{display:block;font-size:16px;color:var(--tx)}
+.lo b{color:var(--ok)}.hi b{color:var(--bad)}
+.row{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.row input{width:90px}.row select{width:auto}
+.find{margin-top:10px;font-size:12px;color:var(--mut)}.find a{color:var(--ac);margin-right:10px;text-decoration:none}
+.empty{text-align:center;color:var(--mut);padding:36px 10px;border:1px dashed var(--line);border-radius:14px}
+.foot{margin-top:24px;color:var(--mut);font-size:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.stats b{font-size:17px}}
+.bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.bar select{flex:1;min-width:140px;width:auto}.row2{display:flex;gap:8px}.why{font-size:13px;color:var(--ac);margin:2px 0}.est{font-style:italic;margin-top:6px}
+.grid small{display:block;font-size:10px;letter-spacing:.06em;font-weight:600;color:var(--mut)}.grid i{display:block;font-style:normal;font-size:12px;color:var(--mut)}.grid i a{color:var(--ac)}.buy{display:inline-block;margin:2px 0 8px;background:var(--ac);color:#1b130a;font-weight:600;padding:8px 12px;border-radius:9px;text-decoration:none;font-size:13px}.chg{font-size:13px;font-weight:600;margin:4px 0}.chg.dn{color:var(--ok)}.chg.up{color:var(--bad)}.due{color:var(--ac)}.wb{font-size:12px;margin-top:6px;color:var(--mut)}.wb a{color:var(--tx);margin-right:10px}.wb a.l{color:var(--ok);font-weight:600}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}.md{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:380px;width:100%}.md p{margin:0 0 10px;white-space:pre-wrap}.md .row{justify-content:flex-end;margin-top:10px}
+.facts{margin:12px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden}.facts>div{display:grid;grid-template-columns:1.3fr 1fr 1.2fr;gap:8px;padding:9px 10px;border-bottom:1px solid var(--line);align-items:baseline}.facts>div:last-child{border:0}.facts span{color:var(--mut);font-size:13px;font-weight:600}.facts b{font-size:17px}.facts em{font-style:normal;font-size:13px;color:var(--mut)}.facts em a{color:var(--ac)}.facts .hi b{color:var(--bad)}.facts .lo b{color:var(--ok)}
+.ch{margin:12px 0}.ch h4{margin:0 0 6px;font-size:14px}.bar1{display:grid;grid-template-columns:86px 1fr 74px;gap:8px;align-items:center;margin:4px 0;font-size:13px}.trk{background:var(--bg);border-radius:6px;height:16px;overflow:hidden}.trk i{display:block;height:100%;background:var(--mut);opacity:.5}.bar1.low .trk i{background:var(--ok);opacity:1}.bar1.low b{color:var(--ok)}.ch small{color:var(--mut)}
+form.add label,.lb{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--mut)}.row2{align-items:flex-end}.row2 label{flex:1}.row{align-items:flex-end}
+.facts{display:grid;grid-template-columns:1fr 1fr}.facts>div{display:flex;flex-direction:column;gap:2px;border-right:1px solid var(--line)}.facts>div:nth-child(2n){border-right:0}.facts>div:nth-last-child(-n+2){border-bottom:0}.facts span{text-transform:uppercase;letter-spacing:.04em;font-size:11px}
+form.add h2{margin:0;font-size:16px}form.add h2.sec{margin-top:6px;padding-top:12px;border-top:1px solid var(--line)}form.add h2 small{display:block;font-size:12px;font-weight:400;color:var(--mut);margin-top:2px}input[readonly],select:disabled{opacity:.7;cursor:not-allowed;background:var(--card);border-style:dashed}
+.tr{display:flex;flex-direction:column;align-items:flex-end;gap:6px}.tg{font-size:12px;padding:4px 10px;white-space:nowrap;color:var(--mut)}.item.sm{padding:10px 14px}.item.sm .why{margin:0}
+.ti{display:flex;gap:10px;align-items:center;min-width:0}.ti>div{min-width:0}.pic{width:44px;height:44px;border-radius:8px;background:var(--bg);border:1px solid var(--line);flex:none;object-fit:contain;padding:3px}.pic.big{display:block;margin-bottom:6px}
+.ulink{display:block;padding:9px 10px;border:1px dashed var(--line);border-radius:9px;background:var(--card);color:var(--ac);font-weight:600;font-size:15px;text-decoration:none;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.ulink.empty{color:var(--mut);font-weight:400;opacity:.7}.ulink:not(.empty):hover{text-decoration:underline}
+html{-webkit-text-size-adjust:100%}button,select,a{touch-action:manipulation}
+@media(max-width:600px),(pointer:coarse){input,select{font-size:16px;min-height:44px}button,.buy{min-height:44px}.tg{min-height:36px}}
+@media(max-width:600px){
+header{flex-wrap:nowrap;align-items:flex-start;margin-bottom:14px}h1{font-size:22px}.cd b{font-size:20px}.cd .sub{font-size:12px}
+.bar{display:grid;grid-template-columns:repeat(4,1fr)}.bar select{grid-column:1/-1;flex:none;width:100%}.bar button{padding:8px 4px;font-size:13px}
+form.add{padding:12px}.stats{gap:6px}.stat{padding:8px 10px}
+.item .row{display:grid;grid-template-columns:1fr 1fr;align-items:end}.item .row input,.item .row select{width:100%}.item .row>button:last-child{grid-column:1/-1}
+.find a{display:inline-block;padding:8px 8px 8px 0}.md{max-width:none}
+.foot button{flex:1 1 auto}.buy{display:flex;align-items:center;justify-content:center;text-align:center}
+}
+.trow{display:flex;gap:6px;align-items:center}.x{width:40px;height:40px;min-height:40px;padding:0;border-radius:50%;color:var(--mut);font-size:15px;line-height:1;display:inline-flex;align-items:center;justify-content:center}.x:hover{color:var(--bad);border-color:var(--bad)}
+.acts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:14px 0 4px}.acts button{min-height:44px;padding:8px 6px;font-weight:600;font-size:14px;border-radius:11px;white-space:normal;line-height:1.2}
+.a-must{background:var(--ac);border-color:var(--ac);color:#1b130a}.a-buy{background:transparent;border:1.5px solid var(--ok);color:var(--ok)}.a-buy:hover{background:var(--ok);color:#10200f}.a-back{background:var(--ac2);border-color:var(--ac);color:var(--ac)}.a-edit{border-style:dashed;color:var(--mut);font-weight:500}.a-edit:hover{color:var(--tx)}
+.trow .tg,.trow .x{height:40px;min-height:40px;box-sizing:border-box;border-radius:20px;border:1px solid var(--line);color:var(--mut);display:inline-flex;align-items:center;justify-content:center;line-height:1}.trow .tg{padding:0 14px;font-size:13px;font-weight:500}.trow .x{width:40px;padding:0;font-size:16px}
+.det{display:grid;grid-template-columns:1fr 1fr;gap:8px}.det[hidden]{display:none}
+.pvh{display:flex;gap:10px;align-items:center;min-width:0}.pvh b{font-size:16px;min-width:0;overflow-wrap:anywhere}.desc{margin:8px 0 2px;line-height:1.45}
+.desc{overflow-wrap:anywhere}
+.deal{margin:12px 0;border:1px solid var(--line);border-radius:14px;padding:14px;background:linear-gradient(160deg,var(--ac2),var(--card) 60%)}
+.dl-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.dl-k{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.dl-p{font-size:34px;font-weight:800;letter-spacing:-1px;color:var(--ok);line-height:1.1;font-variant-numeric:tabular-nums}
+.dl-s{font-size:13px;color:var(--mut)}
+.chips{display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.chip{font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:var(--bg);border:1px solid var(--line);color:var(--mut);white-space:nowrap}.chip.g{background:var(--ok);border-color:var(--ok);color:#10200f}
+.rng{margin:18px 0 6px}.rng-t{position:relative;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--ok),var(--ac),var(--bad))}.rng-t i{position:absolute;top:50%;width:18px;height:18px;border-radius:50%;background:var(--tx);border:3px solid var(--card);transform:translate(-50%,-50%);box-shadow:0 0 0 1px var(--line)}
+.rng-l{display:flex;justify-content:space-between;gap:10px;margin-top:12px}.rng-l>div{display:flex;flex-direction:column;gap:1px;min-width:0}.rng-l .r{text-align:right;align-items:flex-end}.rng-l span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600}.rng-l b{font-size:18px;font-variant-numeric:tabular-nums}.rng-l .lo{color:var(--ok)}.rng-l .hi{color:var(--bad)}.rng-l em{font-style:normal;font-size:12px;color:var(--mut)}.rng-l em a{color:var(--ac)}
+.ct{margin:16px 0 6px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600}.deal .ch{margin:0}.deal .ct{margin-top:22px}.deal .buy{margin:10px 0 8px;width:100%}
+.det{padding:14px;border:1px solid var(--line);border-radius:14px;background:linear-gradient(160deg,var(--ac2),var(--card) 55%)}
+.det h2{margin:0;font-size:16px}.dh{display:flex;justify-content:space-between;align-items:center}.found{font-size:12px;font-weight:700;background:var(--ok);color:#10200f;padding:3px 10px;border-radius:99px}.dsub{margin-top:-2px}
+.tile{display:flex;flex-direction:column;gap:2px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--bg);min-width:0}
+.tile span{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600}
+.tile b{font-size:22px;font-weight:800;letter-spacing:-.5px;overflow-wrap:anywhere;display:flex;align-items:center;gap:8px;font-variant-numeric:tabular-nums}
+.tile em{font-style:normal;font-size:12px;color:var(--mut);min-height:1em}
+#dp{color:var(--ok)}#dt{color:var(--ok)}#ds{font-size:17px;letter-spacing:0}
+.dot{width:26px;height:26px;border-radius:50%;background:var(--ac);color:#1b130a;font-style:normal;font-size:14px;font-weight:700;display:inline-flex;align-items:center;justify-content:center;flex:none;letter-spacing:0}
+.tl{text-decoration:none;background:var(--ac2);border-color:var(--ac)}.tl b{font-size:16px;color:var(--ac);letter-spacing:0}.tl.off{background:var(--bg);border:1px dashed var(--line)}.tl.off b{color:var(--mut);font-weight:500}.tl:not(.off):hover{border-color:var(--tx)}
+.hist{margin:14px 0 2px}.hist svg{display:block;width:100%;height:auto;overflow:visible}.hist .ct{margin:0 0 6px}
+.hl{fill:none;stroke:var(--ac);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round}.ha{fill:var(--ac);opacity:.14}.hg{stroke:var(--line);stroke-width:1}
+.hlo{fill:var(--ok);stroke:var(--card);stroke-width:2}.hhi{fill:var(--bad);stroke:var(--card);stroke-width:2}.hnow{fill:var(--tx);stroke:var(--card);stroke-width:2}
+.ht{font-size:10px;fill:var(--mut);font-family:inherit;font-variant-numeric:tabular-nums}.ht.lo{fill:var(--ok);font-weight:700}.ht.hi{fill:var(--bad);font-weight:700}
+</style></head><body><main>
+<header><div><h1>Black Friday <span>Power</span></h1><div class="sub">Wait for the lowest price. Then buy.</div></div>
+<div class="cd"><b id="days">–</b><span class="sub">days to Black Friday</span></div></header>
+<div class="stats"><div class="stat"><b id="s1">$0</b><small>Watch list total</small></div><div class="stat"><b id="s2">$0</b><small>Buy list total</small></div><div class="stat"><b id="s3">$0</b><small>Bought list total</small></div></div>
+<div class="bar"><select id="ls"></select><button id="nl">+ New list</button><button id="sh">Share</button><button id="jn">Join</button><button id="dl">Delete list</button></div>
+<div class="sub" id="who" style="margin:-6px 0 12px"></div>
+<div id="alerts"></div>
+<form class="add" id="f" novalidate>
+<h2 class="w">Search for an item</h2>
+<div class="w row2"><label>Product name<input id="n" placeholder="e.g. Sony PS5" required></label><button type="button" id="lk">Search</button></div>
+<label class="w">Why do you want it?<input id="y" placeholder="e.g. Christmas gift for the kids"></label>
+<div class="w" id="pv"></div>
+<div class="w det" id="det" hidden>
+<div class="w dh"><h2>Item details</h2><span class="found">✓ Found</span></div>
+<div class="w sub dsub">Filled in automatically from your search. Not editable.</div>
+<div class="tile"><span>Price right now</span><b id="dp"></b><em id="dpe">Estimate, not live</em></div>
+<div class="tile"><span>Lowest price ever found</span><b id="dt"></b><em id="dts"></em></div>
+<div class="tile"><span>Store with the lowest price</span><b id="ds"></b><em id="dss"></em></div>
+<a id="ul" class="tile tl off"><span>Product link</span><b>Filled in by Search</b></a>
+<div class="w" id="dhist"></div>
+<input id="u" type="hidden"><input id="t" type="hidden"><input id="p" type="hidden"><select id="s" hidden disabled></select>
+</div>
+<button class="p w" type="button" id="add">Add to list</button></form>
+<div class="tabs" id="tabs"></div><div id="list"></div>
+<div class="foot"><button id="ex">Copy backup</button><button id="im">Restore backup</button><button id="nt">Enable alerts</button></div>
+</main>
+<script>
+/* Hosted (Vercel) mode: when the Claude runtime is absent, ask our own /api/sample endpoint. */
+const HOSTED_SAMPLE={json:async prompt=>{const r=await fetch("/api/sample",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({prompt})});if(!r.ok)throw new Error("lookup failed");return r.json()}};
+</script>
+<script>
+const STORES=["Amazon","Best Buy","Walmart","Target","Newegg","B&H","Apple","Costco","Other"];
+const SEARCH={"Amazon":q=>"https://www.amazon.com/s?k="+q,"Best Buy":q=>"https://www.bestbuy.com/site/searchpage.jsp?st="+q,"Walmart":q=>"https://www.walmart.com/search?q="+q,"Target":q=>"https://www.target.com/s?searchTerm="+q,"Newegg":q=>"https://www.newegg.com/p/pl?d="+q,"B&H":q=>"https://www.bhphotovideo.com/c/search?q="+q,"Apple":q=>"https://www.apple.com/us/search/"+q,"Costco":q=>"https://www.costco.com/CatalogSearch?keyword="+q};
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const $$=n=>"$"+Number(n).toFixed(2).replace(/\.00$/,"");
+function syncLink(){const v=$("u").value,a=$("ul");if(/^https?:\/\//i.test(v)){a.href=v;a.target="_blank";a.rel="noopener";a.className="tile tl";a.innerHTML="<span>Product link</span><b>Open at "+esc($("s").value)+" →</b><em>Opens the store's search results</em>"}else{a.removeAttribute("href");a.className="tile tl off";a.innerHTML="<span>Product link</span><b>Filled in by Search</b>"}}
+function renderDet(){const p=num($("p").value),t=num($("t").value),st=$("s").value,n=look&&look.stores?look.stores.length:0;$("dp").textContent=p?$$(p):"–";$("dpe").textContent=look&&look.at?"Estimated "+fmtAt(look.at)+". Not live.":"Estimate, not live";$("dt").textContent=t?$$(t):"–";$("dts").textContent=look&&look.lowStore?"at "+look.lowStore:"on record";$("ds").innerHTML='<i class="dot">'+esc(st.charAt(0))+'</i>'+esc(st);$("dss").textContent=n>1?"cheapest of "+n+" stores":""}
+const cut=t=>{t=String(t||"").replace(/\s+/g," ").trim();if(t.length<=170)return t;const m=t.slice(0,170),i=Math.max(m.lastIndexOf(". "),m.lastIndexOf("! "),m.lastIndexOf("? "));if(i>50)return m.slice(0,i+1);const j=m.lastIndexOf(" ");return m.slice(0,j>50?j:170).replace(/[,;:\s]+$/,"")+"…"};
+function histChart(h,nn){if(!Array.isArray(h)||h.length<3)return'<div class="hist"><h4 class="ct">Price history · past 12 months</h4><div class="sub est">No price history available for this item.</div></div>';const W=320,H=130,L=10,R=10,T=18,B=24,n=h.length,ps=h.map(x=>x.p),mn=Math.min(...ps),mx=Math.max(...ps),sp=mx-mn||1;
+ const X=i=>L+(W-L-R)*i/(n-1),Y=v=>T+(H-T-B)*(1-(v-mn)/sp),pts=h.map((x,i)=>X(i).toFixed(1)+","+Y(x.p).toFixed(1)),li=ps.indexOf(mn),hi=ps.indexOf(mx);
+ const an=x=>x<60?"start":x>W-60?"end":"middle",mon=m=>{const d=new Date((m||"")+"-01T00:00:00");return isNaN(d)?"":d.toLocaleDateString(undefined,{month:"short",year:"2-digit"})};
+ const lab=(n>=12?[0,3,6,9,11]:[0,Math.round((n-1)/2),n-1]).map(i=>`<text x="${X(i).toFixed(1)}" y="${H-6}" class="ht" text-anchor="${i===0?"start":i===n-1?"end":"middle"}">${esc(mon(h[i].m))}</text>`).join("");
+ return`<div class="hist"><h4 class="ct">Price history · past 12 months (estimated)</h4><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated price history over the past 12 months"><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="hg"/><path d="M${X(0).toFixed(1)},${H-B} L${pts.join(" L")} L${X(n-1).toFixed(1)},${H-B}Z" class="ha"/><polyline points="${pts.join(" ")}" class="hl"/><circle cx="${X(hi).toFixed(1)}" cy="${Y(mx).toFixed(1)}" r="4" class="hhi"/><circle cx="${X(li).toFixed(1)}" cy="${Y(mn).toFixed(1)}" r="4" class="hlo"/><circle cx="${X(n-1).toFixed(1)}" cy="${Y(ps[n-1]).toFixed(1)}" r="4.5" class="hnow"/>${mx>mn?`<text x="${X(hi).toFixed(1)}" y="${(Y(mx)-8).toFixed(1)}" class="ht hi" text-anchor="${an(X(hi))}">High ${$$(mx)}</text>`:""}<text x="${X(li).toFixed(1)}" y="${(Y(mn)-8).toFixed(1)}" class="ht lo" text-anchor="${an(X(li))}">${mx>mn?"Low ":""}${$$(mn)}</text>${lab}</svg>${nn?"":'<div class="sub est">Estimated by Claude from its knowledge, not recorded prices.</div>'}</div>`}
+const yr12=h=>{if(!Array.isArray(h))return[];const d=new Date(),ks=[];for(let k=11;k>=0;k--){const x=new Date(d.getFullYear(),d.getMonth()-k,1);ks.push(x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0"))}
+ const by={};h.forEach(x=>{if(x&&x.m)by[x.m]=x.p});let hit=ks.filter(k=>by[k]).length;let v;
+ if(hit>=6){v=ks.map(k=>by[k]||null);for(let i=0;i<12;i++)if(v[i]==null){let a=i-1,b=i+1;while(a>=0&&v[a]==null)a--;while(b<12&&v[b]==null)b++;v[i]=a>=0&&b<12?v[a]+(v[b]-v[a])*(i-a)/(b-a):a>=0?v[a]:v[b]}}
+ else{const t=h.slice(-12);if(t.length<6)return[];v=ks.map((k,i)=>{const j=i-(12-t.length);return j>=0?t[j].p:t[0].p})}
+ return ks.map((k,i)=>({m:k,p:v[i]}))};
+const fmtAt=t=>new Date(t).toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
+const num=v=>+String(v==null?0:v).replace(/[^0-9.]/g,"")||0;
+function ask(msg,o){o=o||{};return new Promise(res=>{const ov=document.createElement("div");ov.className="ov";ov.innerHTML='<div class="md"><p></p>'+(o.input?'<input id="aq">':"")+'<div class="row">'+(o.cancel===0?"":'<button id="ac">Cancel</button>')+'<button class="p" id="ok">'+(o.ok||"OK")+'</button></div></div>';ov.querySelector("p").textContent=msg;document.body.appendChild(ov);const q=ov.querySelector("#aq");if(q){q.value=o.val||"";q.focus();q.select()}const done=v=>{ov.remove();res(v)};ov.querySelector("#ok").onclick=()=>done(q?q.value:true);const c=ov.querySelector("#ac");if(c)c.onclick=()=>done(null);if(q)q.onkeydown=e=>{if(e.key==="Enter")done(q.value)}})}
+function chart(m,name,nh){const e=Object.entries(m).sort((a,b)=>a[1]-b[1]);if(!e.length)return"";const mx=e[e.length-1][1],lo=e[0][1];
+ return`<div class="ch">${nh?`<h4 class="ct">Compare stores</h4>`:`<h4>Cheapest right now: ${esc(e[0][0])} at ${$$(lo)}</h4>`}`+e.map(([k,v],j)=>`<div class="bar1 ${j?"":"low"}"><a ${hr(k,name)} style="color:inherit">${esc(k)}</a><div class="trk"><i style="width:${Math.max(6,v/mx*100)}%"></i></div><b>${$$(v)}</b></div>`).join("")+(e.length>1?`<small>${esc(e[0][0])} is ${$$(mx-lo)} cheaper than the priciest store (${esc(e[e.length-1][0])}).</small>`:`<small>Only one store found for this item.</small>`)+`</div>`}
+const okImg=u=>typeof u==="string"&&u.indexOf("data:image/svg+xml")===0&&u.length<8000;
+const svgUrl=v=>{if(typeof v!=="string")return"";v=v.trim();if(!/^<svg[\s>]/i.test(v)||v.length>4000||/<script|<foreignObject|<image|href\s*=|on\w+\s*=/i.test(v))return"";if(!/xmlns=/.test(v))v=v.replace(/^<svg/i,'<svg xmlns="http://www.w3.org/2000/svg"');return"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(v)};
+const pic=i=>okImg(i.img)?`<img class="pic" src="${esc(i.img)}" alt="">`:"";
+const opts=STORES.map(s=>`<option>${s}</option>`).join("");$("s").innerHTML=opts;
+$("days").textContent=Math.max(0,Math.ceil((new Date(2026,10,27)-new Date())/864e5));
+let B,uid="me",idx={lists:[]},cur=null,L={name:"",items:[]},unsub=null,look=null,tab="watch",seen={};
+const cl=d=>d==null?d:JSON.parse(JSON.stringify(d));
+const dbB=db=>({shared:true,get:async p=>{const s=await db.doc(p).get();return s.exists?cl(s.data()):null},set:(p,d)=>db.doc(p).set(cl(d)),del:p=>db.doc(p).delete(),watch:(p,cb)=>db.doc(p).onSnapshot(s=>cb(s.exists?cl(s.data()):null))});
+const locB=()=>{const ls={};const rd=p=>{try{return JSON.parse(localStorage.getItem("bfp2:"+p))}catch(e){return null}};
+ return{shared:false,del:async p=>{try{localStorage.removeItem("bfp2:"+p)}catch(e){}},get:async p=>rd(p),set:async(p,d)=>{try{localStorage.setItem("bfp2:"+p,JSON.stringify(d))}catch(e){}(ls[p]||[]).forEach(f=>f(d))},watch:(p,cb)=>{(ls[p]=ls[p]||[]).push(cb);cb(rd(p));return()=>{ls[p]=ls[p].filter(f=>f!==cb)}}}};
+const hr=(st,n)=>{const u=lnk(st,n);return u?`href="${u}" target="_blank" rel="noopener"`:""};
+const lnk=(st,n)=>SEARCH[st]?SEARCH[st](encodeURIComponent(n)):"";
+const idxP=()=>"data/users/"+uid+"/index";
+const pathOf=l=>l.s?"shared/"+l.id:"data/users/"+uid+"/l"+l.id;
+const saveIdx=()=>B.set(idxP(),idx).catch(()=>{});
+let busy=0,col={};try{col=JSON.parse(localStorage.getItem("bfpc")||"{}")||{}}catch(e){col={}}
+const save=()=>{try{render()}catch(e){ask("Display problem: "+(e&&e.message||e),{cancel:0})}L.rev=Date.now();busy++;let d;try{d=JSON.parse(JSON.stringify(L))}catch(e){d=L}B.set(pathOf(cur),d).catch(e=>ask("Couldn't save ("+((e&&(e.message||e.code))||"unknown")+"). You may only have view access to this page.",{cancel:0})).finally(()=>{busy--})};
+async function boot(){
+ let db=null,u=null;const t=()=>new Promise(r=>setTimeout(()=>r(null),4000));
+ try{if(window.claude){[db,u]=await Promise.all([Promise.race([claude.use("db"),t()]),Promise.race([claude.use("user"),t()])]);if(db&&u){const i=await u.id();if(i)uid=i;else db=null}}}catch(e){db=null}
+ B=db?dbB(db):locB();
+ $("who").textContent=db?"Private lists are yours alone. Shared lists sync live with everyone who joins with the code.":"Offline mode: saved in this browser only. Sharing needs the signed-in version.";
+ try{idx=(await B.get(idxP()))||{lists:[]}}catch(e){}
+ if(!idx.lists.length){idx.lists.push({id:"main",name:"My list"});saveIdx()}
+ open(idx.lists[0].id)}
+function open(id){if(unsub)unsub();cur=idx.lists.find(l=>l.id===id)||idx.lists[0];
+ $("ls").innerHTML=idx.lists.map(l=>`<option value="${esc(l.id)}" ${l.id===cur.id?"selected":""}>${l.s?"👥 ":""}${esc(l.name)}</option>`).join("");
+ L={name:cur.name,items:[]};unsub=B.watch(pathOf(cur),d=>{if(busy)return;if(L.rev&&(!d||(d.rev||0)<L.rev))return;L=cl(d)||{name:cur.name,items:[]};if(!Array.isArray(L.items))L.items=[];render()})}
+$("ls").onchange=e=>open(e.target.value);
+$("nl").onclick=async()=>{const n=((await ask("Name your new private list:",{input:1,ok:"Create"}))||"").trim();if(!n)return;const id=Date.now().toString(36);idx.lists.push({id,name:n});saveIdx();B.set("data/users/"+uid+"/l"+id,{name:n,items:[]});open(id)};
+$("dl").onclick=async()=>{const gone=cur,sh=!!gone.s;
+ if(!await ask(sh?"Remove \""+gone.name+"\" from your lists? The other people on it keep their copy.":"Delete \""+gone.name+"\" and everything on it? This can't be undone.",{ok:sh?"Remove":"Delete"}))return;
+ if(unsub){unsub();unsub=null}
+ idx.lists=idx.lists.filter(l=>l.id!==gone.id);
+ if(!sh){try{await B.del(pathOf(gone))}catch(e){}}
+ if(!idx.lists.length)idx.lists.push({id:"l"+Date.now().toString(36),name:"My list"});
+ saveIdx();open(idx.lists[0].id)};
+$("sh").onclick=async()=>{if(!B.shared)return ask("Sharing needs the signed-in version of this page.",{cancel:0});
+ if(cur.s)return ask("Give this code to the people you want on the list. They tap Join and paste it:",{input:1,val:cur.id,cancel:0});
+ if(!await ask("Share this list? Anyone with the code can see and edit it.",{ok:"Share"}))return;
+ const code=Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
+ await B.set("shared/"+code,L);cur.id=code;cur.s=1;saveIdx();open(code);ask("Share this code. They tap Join and paste it:",{input:1,val:code,cancel:0})};
+$("jn").onclick=async()=>{if(!B.shared)return ask("Joining needs the signed-in version of this page.",{cancel:0});
+ const c=((await ask("Paste the share code:",{input:1,ok:"Join"}))||"").trim();if(!c)return;
+ if(idx.lists.some(l=>l.id===c))return open(c);
+ const d=await B.get("shared/"+c);if(!d)return ask("No list found for that code.",{cancel:0});
+ idx.lists.push({id:c,name:d.name||"Shared list",s:1});saveIdx();open(c)};
+function info(i){const pr=i.prices||[],cur=pr[pr.length-1];if(!cur)return null;
+ const ps=pr.map(x=>x.p);let lo=Math.min(...ps),hi=Math.max(...ps),loS=[...pr].reverse().find(x=>x.p===lo).s,hiS=[...pr].reverse().find(x=>x.p===hi).s;
+ if(i.loAll&&i.loAll<lo){lo=i.loAll;loS=i.loWhere||"?"}if(i.hiAll>hi){hi=i.hiAll;hiS=i.hiWhere||""}const prev=pr[pr.length-2],chg=prev?cur.p-prev.p:0,days=Math.floor((Date.now()-(cur.t||0))/864e5);
+ const m={};(i.stores||[]).forEach(x=>m[x.store]=x.price);pr.forEach(x=>m[x.s]=x.p);
+ const best=Object.entries(m).sort((a,b)=>a[1]-b[1])[0];
+ const atT=i.target&&cur.p<=i.target,atL=cur.p<=lo&&hi>lo;
+ return{cur,lo,hi,loS,hiS,best,m,atT,atL,chg,prev,days,hot:atT||atL}}
+function render(){const it=L.items,w=it.filter(i=>i.st==="watch"),m=it.filter(i=>i.st==="must"),b=it.filter(i=>i.st==="bought");
+ const cs=a=>a.reduce((t,i)=>{const n=info(i);return t+(n?n.cur.p:0)},0);
+ $("s1").textContent=$$(cs(w));$("s2").textContent=$$(cs(m));
+ $("s3").textContent=$$(b.reduce((t,i)=>t+(+i.paid||0),0));
+ const hot=w.filter(i=>{const n=info(i);return n&&n.hot});
+ $("alerts").innerHTML=(hot.length?`<div class="alert"><b>Time to buy (${hot.length})</b>`+hot.map(i=>{const n=info(i);return`<div><span>${esc(i.name)} at ${$$(n.cur.p)} (${esc(n.cur.s)})</span><button class="p" data-a="must" data-id="${i.id}">Move to Must Buy</button></div>`}).join("")+`</div>`:"");
+ hot.forEach(i=>{const k=i.id+":"+info(i).cur.p;if(!seen[k]){seen[k]=1;try{if(window.Notification&&Notification.permission==="granted")new Notification("Black Friday Power",{body:i.name+" hit "+$$(info(i).cur.p)+". Buy it now."})}catch(e){}}});
+ $("tabs").innerHTML=[["watch","Watching",w.length],["must","Must Buy",m.length],["bought","Bought",b.length]].map(t=>`<button class="${tab===t[0]?"on":""}" data-tab="${t[0]}">${t[1]} · ${t[2]}</button>`).join("");
+ const c=it.filter(i=>i.st===tab);
+ if(!c.length){$("list").innerHTML=`<div class="empty">${tab==="watch"?"Nothing here yet. Type a product name above and tap Search.":tab==="must"?"No must-buys. Items on sale will land here.":"Nothing bought yet."}</div>`;return}
+ $("list").innerHTML=c.map(i=>{const n=info(i),q=encodeURIComponent(i.name);
+  const badge=i.st==="bought"?`<span class="badge g">Bought</span>`:n&&n.atT?`<span class="badge">At lowest price</span>`:n&&n.atL?`<span class="badge">Lowest yet</span>`:n&&n.chg<0?`<span class="badge g">Price drop</span>`:n&&n.chg>0?`<span class="badge" style="background:var(--bad)">Price up</span>`:"";
+  const find=Object.keys(SEARCH).map(k=>`<a href="${SEARCH[k](q)}" target="_blank" rel="noopener">${k}</a>`).join("");
+  const acts=`<div class="acts">`+(i.st==="watch"?`<button class="a-must" data-a="must" data-id="${i.id}">★ Must Buy</button>`:`<button class="a-back" data-a="watch" data-id="${i.id}">↩ Back to watch</button>`)+`<button class="a-buy" data-a="buy" data-id="${i.id}">✓ Bought it</button><button class="a-edit" data-a="why" data-id="${i.id}">✎ Edit why</button></div>`;
+  const x=`<button class="x" data-a="del" data-id="${i.id}" aria-label="Remove item" title="Remove item">✕</button>`;
+  const grid=n?(()=>{const bp=n.best[1],bs=n.best[0],span=n.hi-n.lo,pos=span>0?Math.max(0,Math.min(100,(bp-n.lo)/span*100)):0,off=n.hi>0?Math.round((n.hi-bp)/n.hi*100):0,above=Math.max(0,bp-n.lo);
+  const chips=(above<=0.005?`<span class="chip g">At its lowest ever</span>`:`<span class="chip">${$$(above)} above lowest ever</span>`)+(off>0?`<span class="chip g">${off}% below highest</span>`:"");
+  return`<div class="deal"><div class="dl-top"><div><div class="dl-k">Best price now</div><div class="dl-p">${$$(bp)}</div><div class="dl-s">at ${esc(bs)}</div></div><div class="chips">${chips}</div></div>
+  ${span>0?`<div class="rng"><div class="rng-t"><i style="left:${pos}%"></i></div><div class="rng-l"><div><span>Lowest ever</span><b class="lo">${$$(n.lo)}</b><em>found at <a ${hr(n.loS,i.name)}>${esc(n.loS)}</a></em></div><div class="r"><span>Highest ever</span><b class="hi">${$$(n.hi)}</b><em>${n.hiS?"at "+esc(n.hiS):""}</em></div></div></div>`:""}
+  ${histChart(yr12(i.hist),1)}${chart(n.m,i.name,1)}
+  <a class="buy" ${hr(bs,i.name)}>Open cheapest: ${esc(bs)} ${$$(bp)} →</a>
+  ${n.chg?`<div class="chg ${n.chg<0?"dn":"up"}">${n.chg<0?"▼ Price dropped ":"▲ Price increased "}${$$(Math.abs(n.chg))} (${Math.abs(n.chg/n.prev.p*100).toFixed(1)}%) since the previous logged price</div>`:""}
+  <div class="sub">Estimated ${fmtAt(i.at||n.cur.t||Date.now())} · not live</div></div>`})():`<div class="sub" style="margin:10px 0">No price yet.</div>`;
+  const seenAt="";
+  const tg=i.st!=="bought"?`<button class="tg" data-a="tog" data-id="${i.id}" aria-label="${col[i.id]?"Expand":"Collapse"} item">${col[i.id]?"Expand ▾":"Collapse ▴"}</button>`:"";
+  if(col[i.id]&&i.st!=="bought")return`<div class="item sm"><div class="top"><div class="ti">${pic(i)}<div><h3>${esc(i.name)}</h3>${i.why?`<div class="why">Why: ${esc(i.why)}</div>`:""}${i.url?`<a href="${esc(i.url)}" target="_blank" rel="noopener">Saved link</a>`:""}</div></div><div class="trow">${tg}${x}</div></div></div>`;
+  return`<div class="item ${n&&n.hot&&i.st!=="bought"?"hot":""}"><div class="top"><div class="ti">${pic(i)}<div><h3>${esc(i.name)}</h3>${i.why?`<div class="why">Why: ${esc(i.why)}</div>`:""}${i.url?`<a href="${esc(i.url)}" target="_blank" rel="noopener">Saved link</a>`:""}</div></div><div class="tr"><div class="trow">${tg}${x}</div>${badge}</div></div>
+  ${i.desc?`<div class="sub desc">${esc(cut(i.desc))}</div>`:""}${grid}${seenAt}${i.tip?`<div class="sub">Tip: ${esc(i.tip)}</div>`:""}${i.hiAll?`<div class="sub est">History and store prices are estimates from Claude's knowledge, not live data. Check the stores before buying.</div>`:""}
+  ${i.st==="bought"?`<div class="sub">Paid ${$$(i.paid)}, saved ${$$(Math.max(0,(i.hi||0)-i.paid))} vs highest.</div>`:`${acts}<div class="find">Check live: ${find}</div>`}</div>`}).join("")}
+$("lk").onclick=async()=>{const n=$("n").value.trim();if(!n)return $("n").focus();const bt=$("lk");bt.textContent="Looking up…";bt.disabled=true;
+ try{const sm=window.claude?await claude.use("sample"):HOSTED_SAMPLE;if(!sm)throw 0;
+  const r=await sm.json(`Product: "${n}". Using only your own knowledge (no live data), return ONLY JSON: {"name":"canonical product name","stores":[{"store":"","price":0}],"allTimeHigh":0,"highStore":"","allTimeLow":0,"lowStore":"","history":[{"month":"YYYY-MM","price":0}],"description":"a short summary of what the product is, one or two plain sentences, under 160 characters in total, ending with a full stop","tip":"short note on when it is usually cheapest","icon":"a simple flat SVG illustration of the product, viewBox 0 0 64 64, under 1200 characters, no text, no scripts, 2 to 4 colors"}. USD. stores = 3-5 major US retailers (Amazon, Best Buy, Walmart, Target, Newegg, B&H, etc) with the typical current street price. These are estimates. history = your best estimate of the typical lowest street price in each of the past 12 calendar months, exactly 12 entries with month as YYYY-MM, oldest first, ending with the current month. Keep every history price between allTimeLow and allTimeHigh. If you do not know the price history, return an empty array.`);
+  if(!r||typeof r!=="object")throw 0;r.stores=(Array.isArray(r.stores)?r.stores:[]).map(x=>({store:String(x.store),price:num(x.price)})).filter(x=>x.price>0).filter(x=>SEARCH[x.store]);r.allTimeHigh=num(r.allTimeHigh);r.allTimeLow=num(r.allTimeLow);["name","highStore","lowStore","tip"].forEach(k=>{r[k]=typeof r[k]==="string"?r[k].slice(0,200):""});r.at=Date.now();r.description=cut(r.description);r.history=(Array.isArray(r.history)?r.history:[]).map(x=>({m:String(x&&x.month||"").slice(0,7),p:num(x&&x.price)})).filter(x=>x.p>0).slice(-24);r.history=yr12(r.history);if(!r.history.length){try{const q=await sm.json(`Product: "${r.name||n}". Using only your own knowledge (no live data), give your best estimate of the typical lowest US street price in each of the past 12 calendar months, oldest first, ending with ${new Date().toISOString().slice(0,7)}. Return ONLY JSON: {"history":[{"month":"YYYY-MM","price":0}]} with exactly 12 entries in USD, all between ${r.allTimeLow||0} and ${r.allTimeHigh||0}.`);r.history=yr12((Array.isArray(q&&q.history)?q.history:[]).map(x=>({m:String(x&&x.month||"").slice(0,7),p:num(x&&x.price)})).filter(x=>x.p>0))}catch(e){r.history=[]}}r.icon=svgUrl(r.icon);look=r;$("n").value=r.name||n;const st=[...r.stores].sort((a,b)=>a.price-b.price)[0];const mm={};r.stores.forEach(x=>mm[x.store]=x.price);$("pv").innerHTML=`<div class="pvh">${r.icon?`<img class="pic" src="${esc(r.icon)}" alt="">`:""}<b>${esc($("n").value)}</b></div>`+(r.description?`<div class="sub desc">${esc(r.description)}</div>`:"")+chart(mm,$("n").value)+'<div class="sub est">Estimates only, not live prices. Searched '+fmtAt(r.at)+'.</div>';
+  if(st){$("p").value=st.price;const o=STORES.includes(st.store)?st.store:"Other";$("s").value=o;$("u").value=lnk(st.store,$("n").value);syncLink()}
+  
+  {const lw=r.allTimeLow||(st?st.price:0);if(lw)$("t").value=lw}
+  renderDet();$("dhist").innerHTML=histChart(r.history);$("det").hidden=!st;
+  bt.textContent="Filled ✓"}catch(e){look=null;$("det").hidden=true;bt.textContent="Search unavailable"}
+ bt.disabled=false;setTimeout(()=>bt.textContent="Search",2500)};
+$("n").addEventListener("input",()=>{if(look&&$("n").value.trim()!==look.name){look=null;["u","t","p"].forEach(k=>$(k).value="");$("s").selectedIndex=0;$("pv").innerHTML="";syncLink();$("det").hidden=true}});
+$("s").onchange=()=>{if(look&&look.stores){const x=look.stores.find(z=>z.store===$("s").value);if(x)$("p").value=x.price}};
+const doAdd=()=>{try{if(!$("n").value.trim())return $("n").focus();if(!B)return ask("Still loading. Try again in a moment.",{cancel:0});if(!look)return ask("Tap Search first so the price details get filled in. Add without them?",{ok:"Add anyway"}).then(v=>{if(v)addItem()});addItem()}catch(err){ask("Couldn't add the item: "+(err&&err.message||err),{cancel:0})}};
+$("add").onclick=doAdd;$("f").onsubmit=e=>{e.preventDefault();doAdd()};
+$("f").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){e.preventDefault();doAdd()}});
+function addItem(){const p=parseFloat($("p").value);
+ const o={id:Date.now(),name:$("n").value.trim(),why:$("y").value.trim(),url:(/^https?:\/\//i.test($("u").value.trim())?$("u").value.trim():""),target:parseFloat($("t").value)||0,st:"watch",prices:isNaN(p)?[]:[{p,s:$("s").value,t:Date.now()}]};
+ if(look){o.hiAll=+look.allTimeHigh||0;o.loAll=+look.allTimeLow||0;o.loWhere=look.lowStore||"";o.hiWhere=look.highStore||"";o.stores=(look.stores||[]).map(x=>({store:String(x.store),price:+x.price})).filter(x=>x.price>0);o.tip=look.tip||"";o.img=look.icon||"";o.at=look.at||Date.now();o.desc=look.description||"";o.hist=look.history||[]}
+ if(!o.name)return;L.items.unshift(o);look=null;$("f").reset();$("u").value="";$("pv").innerHTML="";syncLink();$("det").hidden=true;tab="watch";save()};
+document.addEventListener("click",async e=>{const t=e.target.closest("[data-tab],[data-a]");if(!t)return;
+ if(t.dataset.tab){tab=t.dataset.tab;return render()}
+ const id=+t.dataset.id,i=L.items.find(x=>x.id===id),a=t.dataset.a;if(!i)return;
+ if(a==="tog"){col[id]=!col[id];try{localStorage.setItem("bfpc",JSON.stringify(col))}catch(e){}return render()}
+ if(a==="must")i.st="must";else if(a==="watch")i.st="watch";
+ else if(a==="why"){const v=await ask("Why do you want this?",{input:1,val:i.why||"",ok:"Save"});if(v===null)return;i.why=v.trim()}
+ else if(a==="buy"){const n=info(i);if(!n)return ask("Log a price first.",{cancel:0});i.paid=n.cur.p;i.hi=n.hi;i.st="bought"}
+ else if(a==="del"){if(!await ask("Remove this item from the list?",{ok:"Remove"}))return;L.items=L.items.filter(x=>x.id!==id)}
+ save()});
+$("ex").onclick=async()=>{const s=JSON.stringify(L.items);try{await navigator.clipboard.writeText(s);$("ex").textContent="Copied"}catch(e){ask("Copy your backup:",{input:1,val:s,cancel:0})}};
+$("im").onclick=async()=>{const s=await ask("Paste a backup to restore into this list:",{input:1,ok:"Restore"});if(!s)return;try{const a=JSON.parse(s);if(Array.isArray(a)){L.items=a;save()}}catch(e){ask("That backup could not be read.",{cancel:0})}};
+$("nt").onclick=async()=>{try{const r=await Notification.requestPermission();$("nt").textContent=r==="granted"?"Alerts on":"Alerts blocked"}catch(e){$("nt").textContent="Not supported here"}};
+window.addEventListener("error",e=>ask("Something went wrong: "+e.message,{cancel:0}));
+boot();
+</script></body></html>
