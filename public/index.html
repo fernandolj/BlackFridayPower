@@ -144,11 +144,37 @@ const $$=n=>"$"+Number(n).toFixed(2).replace(/\.00$/,"");
 function syncLink(){const v=$("u").value,a=$("ul");if(/^https?:\/\//i.test(v)){a.href=v;a.target="_blank";a.rel="noopener";a.className="tile tl";a.innerHTML="<span>Product link</span><b>Open at "+esc($("s").value)+" →</b><em>"+(Object.values(DIRECT).includes(v)?"Opens the product page":"Opens the store's search results")+"</em>"}else{a.removeAttribute("href");a.className="tile tl off";a.innerHTML="<span>Product link</span><b>Filled in by Search</b>"}}
 function renderDet(){const p=num($("p").value),t=num($("t").value),st=$("s").value,n=look&&look.stores?look.stores.length:0;$("dp").textContent=p?$$(p):"–";$("dpe").textContent=look&&look.at?(LIVE?"Pulled "+fmtAt(look.at)+" from store APIs.":"Estimated "+fmtAt(look.at)+". Not live."):(LIVE?"":"Estimate, not live");$("dt").textContent=t?$$(t):"–";$("dts").textContent=look&&look.lowStore?"at "+look.lowStore:"on record";$("ds").innerHTML='<i class="dot">'+esc(st.charAt(0))+'</i>'+esc(st);$("dss").textContent=n>1?"cheapest of "+n+" stores":""}
 const cut=t=>{t=String(t||"").replace(/\s+/g," ").trim();if(t.length<=170)return t;const m=t.slice(0,170),i=Math.max(m.lastIndexOf(". "),m.lastIndexOf("! "),m.lastIndexOf("? "));if(i>50)return m.slice(0,i+1);const j=m.lastIndexOf(" ");return m.slice(0,j>50?j:170).replace(/[,;:\s]+$/,"")+"…"};
-function histChart(h,nn){if(!Array.isArray(h)||h.length<3)return'<div class="hist"><h4 class="ct">Price history · past 12 months</h4><div class="sub est">No price history available for this item.</div></div>';const W=320,H=130,L=10,R=10,T=18,B=24,n=h.length,ps=h.map(x=>x.p),mn=Math.min(...ps),mx=Math.max(...ps),sp=mx-mn||1;
+function histChart(h,nn){if(!Array.isArray(h)||h.length<(h[0]&&String(h[0].m).length===10?2:3))return'<div class="hist"><h4 class="ct">Price history · past 12 months</h4><div class="sub est">No price history available for this item.</div></div>';const W=320,H=130,L=10,R=10,T=18,B=24,n=h.length,ps=h.map(x=>x.p),mn=Math.min(...ps),mx=Math.max(...ps),sp=mx-mn||1;
  const X=i=>L+(W-L-R)*i/(n-1),Y=v=>T+(H-T-B)*(1-(v-mn)/sp),pts=h.map((x,i)=>X(i).toFixed(1)+","+Y(x.p).toFixed(1)),li=ps.indexOf(mn),hi=ps.indexOf(mx);
- const an=x=>x<60?"start":x>W-60?"end":"middle",mon=m=>{const d=new Date((m||"")+"-01T00:00:00");return isNaN(d)?"":d.toLocaleDateString(undefined,{month:"short",year:"2-digit"})};
- const lab=(n>=12?[0,3,6,9,11]:[0,Math.round((n-1)/2),n-1]).map(i=>`<text x="${X(i).toFixed(1)}" y="${H-6}" class="ht" text-anchor="${i===0?"start":i===n-1?"end":"middle"}">${esc(mon(h[i].m))}</text>`).join("");
- return`<div class="hist"><h4 class="ct">Price history · past 12 months${LIVE?"":" (estimated)"}</h4><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Estimated price history over the past 12 months"><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="hg"/><path d="M${X(0).toFixed(1)},${H-B} L${pts.join(" L")} L${X(n-1).toFixed(1)},${H-B}Z" class="ha"/><polyline points="${pts.join(" ")}" class="hl"/><circle cx="${X(hi).toFixed(1)}" cy="${Y(mx).toFixed(1)}" r="4" class="hhi"/><circle cx="${X(li).toFixed(1)}" cy="${Y(mn).toFixed(1)}" r="4" class="hlo"/><circle cx="${X(n-1).toFixed(1)}" cy="${Y(ps[n-1]).toFixed(1)}" r="4.5" class="hnow"/>${mx>mn?`<text x="${X(hi).toFixed(1)}" y="${(Y(mx)-8).toFixed(1)}" class="ht hi" text-anchor="${an(X(hi))}">High ${$$(mx)}</text>`:""}<text x="${X(li).toFixed(1)}" y="${(Y(mn)-8).toFixed(1)}" class="ht lo" text-anchor="${an(X(li))}">${mx>mn?"Low ":""}${$$(mn)}</text>${lab}</svg>${nn?"":(LIVE?"":'<div class="sub est">Estimated by Claude from its knowledge, not recorded prices.</div>')}</div>`}
+ const an=x=>x<60?"start":x>W-60?"end":"middle",dly=String(h[0].m).length===10,mon=m=>{const d=new Date((m||"")+(String(m).length===10?"T00:00:00":"-01T00:00:00"));return isNaN(d)?"":d.toLocaleDateString(undefined,dly?{month:"short",day:"numeric"}:{month:"short",year:"2-digit"})};
+ const lab=(n>=12&&!dly?[0,3,6,9,11]:[0,Math.round((n-1)/2),n-1]).map(i=>`<text x="${X(i).toFixed(1)}" y="${H-6}" class="ht" text-anchor="${i===0?"start":i===n-1?"end":"middle"}">${esc(mon(h[i].m))}</text>`).join("");
+ return`<div class="hist"><h4 class="ct">Price history · ${dly?"since "+mon(h[0].m):"past 12 months"+(LIVE?"":" (estimated)")}</h4><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Price history chart"><line x1="${L}" x2="${W-R}" y1="${H-B}" y2="${H-B}" class="hg"/><path d="M${X(0).toFixed(1)},${H-B} L${pts.join(" L")} L${X(n-1).toFixed(1)},${H-B}Z" class="ha"/><polyline points="${pts.join(" ")}" class="hl"/><circle cx="${X(hi).toFixed(1)}" cy="${Y(mx).toFixed(1)}" r="4" class="hhi"/><circle cx="${X(li).toFixed(1)}" cy="${Y(mn).toFixed(1)}" r="4" class="hlo"/><circle cx="${X(n-1).toFixed(1)}" cy="${Y(ps[n-1]).toFixed(1)}" r="4.5" class="hnow"/>${mx>mn?`<text x="${X(hi).toFixed(1)}" y="${(Y(mx)-8).toFixed(1)}" class="ht hi" text-anchor="${an(X(hi))}">High ${$$(mx)}</text>`:""}<text x="${X(li).toFixed(1)}" y="${(Y(mn)-8).toFixed(1)}" class="ht lo" text-anchor="${an(X(li))}">${mx>mn?"Low ":""}${$$(mn)}</text>${lab}</svg>${nn?"":(LIVE?"":'<div class="sub est">Estimated by Claude from its knowledge, not recorded prices.</div>')}</div>`}
+const norm=s=>String(s||"").toLowerCase().replace(/[®™©]/g," ").replace(/[^a-z0-9]+/g," ").trim().slice(0,100);
+let HIST={},HISTERR="";
+const fmtDay=d=>new Date(d+"T00:00:00").toLocaleDateString(undefined,{month:"short",day:"numeric"});
+const trackChart=name=>{const h=HIST[norm(name)],hd='<h4 class="ct">Price history</h4>';
+ if(HISTERR)return`<div class="hist">${hd}<div class="sub est">${esc(HISTERR)}</div></div>`;
+ if(!h)return`<div class="hist">${hd}<div class="sub est">Loading saved prices…</div></div>`;
+ if(!h.length)return`<div class="hist">${hd}<div class="sub est">Tracking is starting for this item. One price is saved each day.</div></div>`;
+ if(h.length<2)return`<div class="hist">${hd}<div class="sub est">Tracking started ${fmtDay(h[0].d)} at ${$$(h[0].p)}. One price is saved each day, so a chart appears after the next one.</div></div>`;
+ return histChart(h.map(x=>({m:x.d,p:x.p})),1)};
+async function loadHist(){if(!LIVE||!L||!Array.isArray(L.items))return;
+ const names=[...new Set(L.items.filter(i=>i.st!=="bought").map(i=>i.name).filter(Boolean))];if(!names.length)return;
+ try{for(let k=0;k<names.length;k+=12){const part=names.slice(k,k+12),r=await fetch("/api/track?"+part.map(n=>"q="+encodeURIComponent(n)).join("&")),j=await r.json().catch(()=>({}));
+   if(!r.ok){HISTERR=j.error||"Price tracking isn't available right now.";render();return}HISTERR="";Object.assign(HIST,j.series||{})}
+  render();
+  const none=names.filter(n=>!(HIST[norm(n)]||[]).length).slice(0,3);
+  for(const n of none)await trackAdd(n);
+  applyDrops()}catch(e){}}
+async function trackAdd(name){if(!LIVE)return;try{const r=await fetch("/api/track",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({q:name})}),j=await r.json().catch(()=>({}));
+ if(!r.ok){HISTERR=j.error||"";return}HISTERR="";if(j.key)HIST[j.key]=j.series||[];render();applyDrops()}catch(e){}}
+function applyDrops(){if(!LIVE)return;let ch=0;
+ L.items.forEach(i=>{if(i.st!=="watch")return;const h=HIST[norm(i.name)];if(!h||h.length<4)return;
+  const cur=h[h.length-1].p,prior=h.slice(0,-1).map(x=>x.p),mn=Math.min(...prior),sr=[...prior].sort((a,b)=>a-b),med=sr[Math.floor(sr.length/2)];
+  const newLow=cur<mn-0.005,big=cur<=med*0.9;if(!(newLow||big))return;if(i.autoAt&&cur>=i.autoAt)return;
+  i.st="must";i.autoAt=cur;i.autoNote=newLow?"Price dropped to "+$$(cur)+", a new low since tracking began (was "+$$(mn)+").":"Price dropped to "+$$(cur)+", "+Math.round((1-cur/med)*100)+"% under its usual "+$$(med)+".";ch++;
+  try{if(window.Notification&&Notification.permission==="granted")new Notification("Black Friday Power",{body:i.name+": "+i.autoNote})}catch(e){}});
+ if(ch)save()}
 const yr12=h=>{if(!Array.isArray(h))return[];const d=new Date(),ks=[];for(let k=11;k>=0;k--){const x=new Date(d.getFullYear(),d.getMonth()-k,1);ks.push(x.getFullYear()+"-"+String(x.getMonth()+1).padStart(2,"0"))}
  const by={};h.forEach(x=>{if(x&&x.m)by[x.m]=x.p});let hit=ks.filter(k=>by[k]).length;let v;
  if(hit>=6){v=ks.map(k=>by[k]||null);for(let i=0;i<12;i++)if(v[i]==null){let a=i-1,b=i+1;while(a>=0&&v[a]==null)a--;while(b<12&&v[b]==null)b++;v[i]=a>=0&&b<12?v[a]+(v[b]-v[a])*(i-a)/(b-a):a>=0?v[a]:v[b]}}
@@ -208,8 +234,9 @@ async function boot(){
  open(idx.lists[0].id)}
 function open(id){if(unsub)unsub();cur=idx.lists.find(l=>l.id===id)||idx.lists[0];
  $("ls").innerHTML=idx.lists.map(l=>`<option value="${esc(l.id)}" ${l.id===cur.id?"selected":""}>${l.s?"👥 ":""}${esc(l.name)}</option>`).join("");
- L={name:cur.name,items:[]};unsub=B.watch(pathOf(cur),d=>{if(busy)return;if(L.rev&&(!d||(d.rev||0)<L.rev))return;L=cl(d)||{name:cur.name,items:[]};if(!Array.isArray(L.items))L.items=[];render()})}
+ L={name:cur.name,items:[]};unsub=B.watch(pathOf(cur),d=>{if(busy)return;if(L.rev&&(!d||(d.rev||0)<L.rev))return;L=cl(d)||{name:cur.name,items:[]};if(!Array.isArray(L.items))L.items=[];render()});setTimeout(loadHist,1200)}
 $("ls").onchange=e=>open(e.target.value);
+if(LIVE){setInterval(()=>{if(!document.hidden)loadHist()},300000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)setTimeout(loadHist,400)})}
 $("nl").onclick=async()=>{const n=((await ask("Name your new private list:",{input:1,ok:"Create"}))||"").trim();if(!n)return;const id=Date.now().toString(36);idx.lists.push({id,name:n});saveIdx();B.set("data/users/"+uid+"/l"+id,{name:n,items:[]});open(id)};
 $("dl").onclick=async()=>{const gone=cur,sh=!!gone.s;
  if(!await ask(sh?"Remove \""+gone.name+"\" from your lists? The other people on it keep their copy.":"Delete \""+gone.name+"\" and everything on it? This can't be undone.",{ok:sh?"Remove":"Delete"}))return;
@@ -230,13 +257,16 @@ $("jn").onclick=async()=>{if(!B.shared)return ask("Joining needs the signed-in v
  let d;try{d=await B.get("shared/"+c)}catch(e){return ask(e.message||"Couldn't reach the shared list.",{cancel:0})}
  if(!d)return ask("No list found for that code.",{cancel:0});
  idx.lists.push({id:c,name:d.name||"Shared list",s:1});saveIdx();open(c)};
-function info(i){const pr=i.prices||[],cur=pr[pr.length-1];if(!cur)return null;
+function info(i){const pr=i.prices||[];let cur=pr[pr.length-1];if(!cur)return null;
  const ps=pr.map(x=>x.p);let lo=Math.min(...ps),hi=Math.max(...ps),loS=[...pr].reverse().find(x=>x.p===lo).s,hiS=[...pr].reverse().find(x=>x.p===hi).s;
- if(i.loAll&&i.loAll<lo){lo=i.loAll;loS=i.loWhere||"?"}if(i.hiAll>hi){hi=i.hiAll;hiS=i.hiWhere||""}const prev=pr[pr.length-2],chg=prev?cur.p-prev.p:0,days=Math.floor((Date.now()-(cur.t||0))/864e5);
- const m={};(i.stores||[]).forEach(x=>m[x.store]=x.price);pr.forEach(x=>m[x.s]=x.p);
+ if(i.loAll&&i.loAll<lo){lo=i.loAll;loS=i.loWhere||"?"}if(i.hiAll>hi){hi=i.hiAll;hiS=i.hiWhere||""}const hs=LIVE&&HIST[norm(i.name)],lt=hs&&hs.length?hs[hs.length-1]:null;
+ if(lt&&lt.st)cur={p:lt.p,s:lt.s,t:Date.parse(lt.d+"T12:00:00")||Date.now()};
+ if(hs&&hs.length){const hp=hs.map(x=>x.p),a=Math.min(...hp),b=Math.max(...hp);if(a<lo){lo=a;loS=hs.find(x=>x.p===a).s}if(b>hi){hi=b;hiS=hs.find(x=>x.p===b).s}}
+ const prev=hs&&hs.length>1?{p:hs[hs.length-2].p}:pr[pr.length-2],chg=prev?cur.p-prev.p:0,days=Math.floor((Date.now()-(cur.t||0))/864e5);
+ const m={};(i.stores||[]).forEach(x=>m[x.store]=x.price);pr.forEach(x=>m[x.s]=x.p);if(lt&&lt.st){for(const k in m)delete m[k];Object.assign(m,lt.st)}
  const best=Object.entries(m).sort((a,b)=>a[1]-b[1])[0];
  const atT=i.target&&cur.p<=i.target,atL=cur.p<=lo&&hi>lo;
- return{cur,lo,hi,loS,hiS,best,m,atT,atL,chg,prev,days,hot:atT||atL}}
+ return{cur,lo,hi,loS,hiS,best,m,atT,atL,chg,prev,days,links:Object.assign({},i.links,lt&&lt.u),hot:atT||atL}}
 function render(){const it=L.items,w=it.filter(i=>i.st==="watch"),m=it.filter(i=>i.st==="must"),b=it.filter(i=>i.st==="bought");
  const cs=a=>a.reduce((t,i)=>{const n=info(i);return t+(n?n.cur.p:0)},0);
  $("s1").textContent=$$(cs(w));$("s2").textContent=$$(cs(m));
@@ -255,9 +285,9 @@ function render(){const it=L.items,w=it.filter(i=>i.st==="watch"),m=it.filter(i=
   const grid=n?(()=>{const bp=n.best[1],bs=n.best[0],span=n.hi-n.lo,pos=span>0?Math.max(0,Math.min(100,(bp-n.lo)/span*100)):0,off=n.hi>0?Math.round((n.hi-bp)/n.hi*100):0,above=Math.max(0,bp-n.lo);
   const chips=(above<=0.005?`<span class="chip g">At its ${LO}</span>`:`<span class="chip">${$$(above)} above ${LO}</span>`)+(off>0?`<span class="chip g">${off}% below highest</span>`:"");
   return`<div class="deal"><div class="dl-top"><div><div class="dl-k">Best price now</div><div class="dl-p">${$$(bp)}</div><div class="dl-s">at ${esc(bs)}</div></div><div class="chips">${chips}</div></div>
-  ${span>0?`<div class="rng"><div class="rng-t"><i style="left:${pos}%"></i></div><div class="rng-l"><div><span>${LIVE?"Lowest seen":"Lowest ever"}</span><b class="lo">${$$(n.lo)}</b><em>found at <a ${hr(n.loS,i.name,i.links)}>${esc(n.loS)}</a></em></div><div class="r"><span>${LIVE?"Highest seen":"Highest ever"}</span><b class="hi">${$$(n.hi)}</b><em>${n.hiS?"at "+esc(n.hiS):""}</em></div></div></div>`:""}
-  ${histChart(yr12(i.hist),1)}${chart(n.m,i.name,1,i.links)}
-  <a class="buy" ${hr(bs,i.name,i.links)||`aria-disabled="true" style="opacity:.55"`}>${hr(bs,i.name,i.links)?"Open cheapest":"No link for"}: ${esc(bs)} ${$$(bp)}${hr(bs,i.name,i.links)?" →":""}</a>
+  ${span>0?`<div class="rng"><div class="rng-t"><i style="left:${pos}%"></i></div><div class="rng-l"><div><span>${LIVE?"Lowest seen":"Lowest ever"}</span><b class="lo">${$$(n.lo)}</b><em>found at <a ${hr(n.loS,i.name,n.links)}>${esc(n.loS)}</a></em></div><div class="r"><span>${LIVE?"Highest seen":"Highest ever"}</span><b class="hi">${$$(n.hi)}</b><em>${n.hiS?"at "+esc(n.hiS):""}</em></div></div></div>`:""}
+  ${i.autoNote?`<div class="sub" style="color:var(--ac);margin:10px 0 0">↓ ${esc(i.autoNote)}</div>`:""}${LIVE?trackChart(i.name):histChart(yr12(i.hist),1)}${chart(n.m,i.name,1,n.links)}
+  <a class="buy" ${hr(bs,i.name,n.links)||`aria-disabled="true" style="opacity:.55"`}>${hr(bs,i.name,n.links)?"Open cheapest":"No link for"}: ${esc(bs)} ${$$(bp)}${hr(bs,i.name,n.links)?" →":""}</a>
   ${n.chg?`<div class="chg ${n.chg<0?"dn":"up"}">${n.chg<0?"▼ Price dropped ":"▲ Price increased "}${$$(Math.abs(n.chg))} (${Math.abs(n.chg/n.prev.p*100).toFixed(1)}%) since the previous logged price</div>`:""}
   <div class="sub">${LIVE?"Pulled":"Estimated"} ${fmtAt(i.at||n.cur.t||Date.now())}${LIVE?" from store APIs":" · not live"}</div></div>`})():`<div class="sub" style="margin:10px 0">No price yet.</div>`;
   const seenAt="";
@@ -273,7 +303,7 @@ $("lk").onclick=async()=>{const n=$("n").value.trim();if(!n)return $("n").focus(
   if(st){$("p").value=st.price;const o=STORES.includes(st.store)?st.store:"Other";$("s").value=o;$("u").value=lnk(st.store,$("n").value);syncLink()}
   
   {const lw=r.allTimeLow||(st?st.price:0);if(lw)$("t").value=lw}
-  renderDet();$("dhist").innerHTML=histChart(r.history);$("det").hidden=!st;
+  renderDet();$("dhist").innerHTML=LIVE?'<div class="hist"><h4 class="ct">Price history</h4><div class="sub est">Once you add this item, its price is saved every day and a history chart builds here.</div></div>':histChart(r.history);$("det").hidden=!st;
   bt.textContent="Filled ✓"}catch(e){look=null;$("det").hidden=true;bt.textContent="Search unavailable"}
  bt.disabled=false;setTimeout(()=>bt.textContent="Search",2500)};
 $("n").addEventListener("input",()=>{if(look&&$("n").value.trim()!==look.name){look=null;["u","t","p"].forEach(k=>$(k).value="");$("s").selectedIndex=0;$("pv").innerHTML="";syncLink();$("det").hidden=true}});
@@ -284,7 +314,7 @@ $("f").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="IN
 function addItem(){const p=parseFloat($("p").value);
  const o={id:Date.now(),name:$("n").value.trim(),why:$("y").value.trim(),url:(/^https?:\/\//i.test($("u").value.trim())?$("u").value.trim():""),target:parseFloat($("t").value)||0,st:"watch",prices:isNaN(p)?[]:[{p,s:$("s").value,t:Date.now()}]};
  if(look){o.hiAll=+look.allTimeHigh||0;o.loAll=+look.allTimeLow||0;o.loWhere=look.lowStore||"";o.hiWhere=look.highStore||"";o.stores=(look.stores||[]).map(x=>({store:String(x.store),price:+x.price})).filter(x=>x.price>0);o.tip=look.tip||"";o.img=look.icon||"";o.at=look.at||Date.now();o.links=look.links||{};o.desc=look.description||"";o.hist=look.history||[]}
- if(!o.name)return;L.items.unshift(o);look=null;$("f").reset();$("u").value="";$("pv").innerHTML="";syncLink();$("det").hidden=true;tab="watch";save()};
+ if(!o.name)return;L.items.unshift(o);look=null;$("f").reset();$("u").value="";$("pv").innerHTML="";syncLink();$("det").hidden=true;tab="watch";save();if(LIVE)trackAdd(o.name)};
 document.addEventListener("click",async e=>{const t=e.target.closest("[data-tab],[data-a]");if(!t)return;
  if(t.dataset.tab){tab=t.dataset.tab;return render()}
  const id=+t.dataset.id,i=L.items.find(x=>x.id===id),a=t.dataset.a;if(!i)return;

@@ -1,4 +1,9 @@
 {
   "outputDirectory": "public",
-  "functions": { "api/prices.js": { "maxDuration": 30 } }
+  "functions": {
+    "api/prices.js": { "maxDuration": 30 },
+    "api/track.js": { "maxDuration": 30 },
+    "api/track-cron.js": { "maxDuration": 60 }
+  },
+  "crons": [{ "path": "/api/track-cron", "schedule": "0 9 * * *" }]
 }
