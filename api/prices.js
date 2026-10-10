@@ -84,6 +84,7 @@ const providers = {
       const link = offerLink(o, store) || offerLink(it, store);
       const price = money(o.price != null ? o.price : it.price);
       if (!store || !price || seen.has(store)) continue;
+      if (!link) continue; // only keep stores that give a direct link to the product
       seen.add(store);
       const photo = Array.isArray(it.product_photos) ? it.product_photos[0] : it.product_photo;
       out.push({ store, title: it.product_title || o.offer_title || "", price, url: link, image: httpUrl(photo) });

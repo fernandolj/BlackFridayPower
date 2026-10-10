@@ -129,7 +129,7 @@ const HOSTED_SAMPLE={json:async prompt=>{
  if(prompt.includes('{"history"'))return{history:[]};
  const m=/^Product: "([^"]*)"/.exec(prompt),q=(m&&m[1]||"").trim();
  const r=await fetch("/api/prices?q="+encodeURIComponent(q));if(!r.ok)throw new Error("lookup failed");
- const d=await r.json(),o=d.offers||[];if(!o.length)throw new Error("no prices");
+ const d=await r.json(),o=(d.offers||[]).filter(x=>x.url);if(!o.length)throw new Error("no prices");
  const links={};o.forEach(x=>{if(x.url){DIRECT[x.store+"|"+q]=x.url;links[x.store]=x.url}});saveDirect();
  const hi=o[o.length-1],lo=o[0];
  return{name:q,stores:o.map(x=>({store:x.store,price:x.price})),allTimeHigh:hi.price,highStore:hi.store,allTimeLow:lo.price,lowStore:lo.store,history:[],links,
