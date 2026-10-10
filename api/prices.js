@@ -84,6 +84,7 @@ module.exports = async (req, res) => {
   const q = String((req.query && req.query.q) || "").trim().slice(0, 120);
   if (q.length < 2) return res.status(400).json({ error: "Missing q" });
   const dbg = req.query && req.query.debug ? {} : null;
+  if (dbg) dbg.envNamesSeen = Object.keys(process.env).filter((k) => /openweb|ninja/i.test(k)); // names only, never values
   const names = Object.keys(providers);
   const settled = await Promise.allSettled(names.map((n) => providers[n](q, dbg)));
   const status = {}, byStore = new Map();
