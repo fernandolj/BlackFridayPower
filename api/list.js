@@ -4,8 +4,12 @@
 // Each list is one Redis hash: field "_meta" = {name}, fields "i:<id>" = one item each,
 // so two people adding items at the same moment never overwrite each other.
 
-const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
-const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
+// Vercel can add a custom prefix to the variable names (for example STORAGE_KV_REST_API_URL),
+// so look for any variable that ends the right way instead of one exact name.
+const envKeys = Object.keys(process.env);
+const pick = (re) => { const k = envKeys.filter((x) => re.test(x) && !/READ_ONLY/i.test(x)).sort()[0]; return k ? process.env[k] : ""; };
+const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || pick(/(KV_REST_API_URL|REDIS_REST_URL)$/i);
+const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || pick(/(KV_REST_API_TOKEN|REDIS_REST_TOKEN)$/i);
 const TTL = 60 * 60 * 24 * 400; // lists expire after ~400 days without changes
 const MAX_ITEMS = 300, MAX_ITEM_CHARS = 20000;
 
@@ -58,6 +62,12 @@ async function readList(code) {
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  if (req.query && req.query.debug) {
+    // Names and yes/no only, never values.
+    let ping = "skipped";
+    if (URL_ && TOKEN) { try { await redis([["PING"]]); ping = "ok"; } catch (e) { ping = "failed: " + String(e.message).slice(0, 60); } }
+    return res.status(200).json({ storageUrlFound: !!URL_, storageTokenFound: !!TOKEN, ping, envNamesSeen: envKeys.filter((k) => /redis|kv_|upstash|storage/i.test(k)) });
+  }
   if (!URL_ || !TOKEN) return res.status(503).json({ error: "Sharing isn't set up on this site yet (no storage connected)." });
   try {
     if (req.method === "GET") {
