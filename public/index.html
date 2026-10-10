@@ -129,9 +129,9 @@ const HOSTED_SAMPLE={json:async prompt=>{
  const m=/^Product: "([^"]*)"/.exec(prompt),q=(m&&m[1]||"").trim();
  const r=await fetch("/api/prices?q="+encodeURIComponent(q));if(!r.ok)throw new Error("lookup failed");
  const d=await r.json(),o=d.offers||[];if(!o.length)throw new Error("no prices");
- o.forEach(x=>{if(x.url)DIRECT[x.store+"|"+q]=x.url});saveDirect();
+ const links={};o.forEach(x=>{if(x.url){DIRECT[x.store+"|"+q]=x.url;links[x.store]=x.url}});saveDirect();
  const hi=o[o.length-1],lo=o[0];
- return{name:q,stores:o.map(x=>({store:x.store,price:x.price})),allTimeHigh:hi.price,highStore:hi.store,allTimeLow:lo.price,lowStore:lo.store,history:[],
+ return{name:q,stores:o.map(x=>({store:x.store,price:x.price})),allTimeHigh:hi.price,highStore:hi.store,allTimeLow:lo.price,lowStore:lo.store,history:[],links,
   description:"Top match: "+(o[0].title||q).slice(0,110)+". Prices pulled live from "+o.map(x=>x.store).join(", ")+".",tip:"",icon:""}}};
 </script>
 <script>
@@ -156,8 +156,8 @@ const yr12=h=>{if(!Array.isArray(h))return[];const d=new Date(),ks=[];for(let k=
 const fmtAt=t=>new Date(t).toLocaleString(undefined,{weekday:"short",month:"short",day:"numeric",hour:"numeric",minute:"2-digit"});
 const num=v=>+String(v==null?0:v).replace(/[^0-9.]/g,"")||0;
 function ask(msg,o){o=o||{};return new Promise(res=>{const ov=document.createElement("div");ov.className="ov";ov.innerHTML='<div class="md"><p></p>'+(o.input?'<input id="aq">':"")+'<div class="row">'+(o.cancel===0?"":'<button id="ac">Cancel</button>')+'<button class="p" id="ok">'+(o.ok||"OK")+'</button></div></div>';ov.querySelector("p").textContent=msg;document.body.appendChild(ov);const q=ov.querySelector("#aq");if(q){q.value=o.val||"";q.focus();q.select()}const done=v=>{ov.remove();res(v)};ov.querySelector("#ok").onclick=()=>done(q?q.value:true);const c=ov.querySelector("#ac");if(c)c.onclick=()=>done(null);if(q)q.onkeydown=e=>{if(e.key==="Enter")done(q.value)}})}
-function chart(m,name,nh){const e=Object.entries(m).sort((a,b)=>a[1]-b[1]);if(!e.length)return"";const mx=e[e.length-1][1],lo=e[0][1];
- return`<div class="ch">${nh?`<h4 class="ct">Compare stores</h4>`:`<h4>Cheapest right now: ${esc(e[0][0])} at ${$$(lo)}</h4>`}`+e.map(([k,v],j)=>`<div class="bar1 ${j?"":"low"}"><a ${hr(k,name)} style="color:inherit">${esc(k)}</a><div class="trk"><i style="width:${Math.max(6,v/mx*100)}%"></i></div><b>${$$(v)}</b></div>`).join("")+(e.length>1?`<small>${esc(e[0][0])} is ${$$(mx-lo)} cheaper than the priciest store (${esc(e[e.length-1][0])}).</small>`:`<small>Only one store found for this item.</small>`)+`</div>`}
+function chart(m,name,nh,lk){const e=Object.entries(m).sort((a,b)=>a[1]-b[1]);if(!e.length)return"";const mx=e[e.length-1][1],lo=e[0][1];
+ return`<div class="ch">${nh?`<h4 class="ct">Compare stores</h4>`:`<h4>Cheapest right now: ${esc(e[0][0])} at ${$$(lo)}</h4>`}`+e.map(([k,v],j)=>`<div class="bar1 ${j?"":"low"}"><a ${hr(k,name,lk)} style="color:inherit">${esc(k)}</a><div class="trk"><i style="width:${Math.max(6,v/mx*100)}%"></i></div><b>${$$(v)}</b></div>`).join("")+(e.length>1?`<small>${esc(e[0][0])} is ${$$(mx-lo)} cheaper than the priciest store (${esc(e[e.length-1][0])}).</small>`:`<small>Only one store found for this item.</small>`)+`</div>`}
 const okImg=u=>typeof u==="string"&&u.indexOf("data:image/svg+xml")===0&&u.length<8000;
 const svgUrl=v=>{if(typeof v!=="string")return"";v=v.trim();if(!/^<svg[\s>]/i.test(v)||v.length>4000||/<script|<foreignObject|<image|href\s*=|on\w+\s*=/i.test(v))return"";if(!/xmlns=/.test(v))v=v.replace(/^<svg/i,'<svg xmlns="http://www.w3.org/2000/svg"');return"data:image/svg+xml;charset=utf-8,"+encodeURIComponent(v)};
 const pic=i=>okImg(i.img)?`<img class="pic" src="${esc(i.img)}" alt="">`:"";
@@ -168,7 +168,7 @@ const cl=d=>d==null?d:JSON.parse(JSON.stringify(d));
 const dbB=db=>({shared:true,get:async p=>{const s=await db.doc(p).get();return s.exists?cl(s.data()):null},set:(p,d)=>db.doc(p).set(cl(d)),del:p=>db.doc(p).delete(),watch:(p,cb)=>db.doc(p).onSnapshot(s=>cb(s.exists?cl(s.data()):null))});
 const locB=()=>{const ls={};const rd=p=>{try{return JSON.parse(localStorage.getItem("bfp2:"+p))}catch(e){return null}};
  return{shared:false,del:async p=>{try{localStorage.removeItem("bfp2:"+p)}catch(e){}},get:async p=>rd(p),set:async(p,d)=>{try{localStorage.setItem("bfp2:"+p,JSON.stringify(d))}catch(e){}(ls[p]||[]).forEach(f=>f(d))},watch:(p,cb)=>{(ls[p]=ls[p]||[]).push(cb);cb(rd(p));return()=>{ls[p]=ls[p].filter(f=>f!==cb)}}}};
-const hr=(st,n)=>{const u=lnk(st,n);return u?`href="${u}" target="_blank" rel="noopener"`:""};
+const hr=(st,n,lk)=>{const u=(lk&&/^https:\/\//.test(lk[st]||"")&&lk[st])||lnk(st,n);return u?`href="${u}" target="_blank" rel="noopener"`:""};
 const lnk=(st,n)=>DIRECT[st+"|"+n]||(SEARCH[st]?SEARCH[st](encodeURIComponent(n)):"");
 const idxP=()=>"data/users/"+uid+"/index";
 const pathOf=l=>l.s?"shared/"+l.id:"data/users/"+uid+"/l"+l.id;
@@ -230,9 +230,9 @@ function render(){const it=L.items,w=it.filter(i=>i.st==="watch"),m=it.filter(i=
   const grid=n?(()=>{const bp=n.best[1],bs=n.best[0],span=n.hi-n.lo,pos=span>0?Math.max(0,Math.min(100,(bp-n.lo)/span*100)):0,off=n.hi>0?Math.round((n.hi-bp)/n.hi*100):0,above=Math.max(0,bp-n.lo);
   const chips=(above<=0.005?`<span class="chip g">At its ${LO}</span>`:`<span class="chip">${$$(above)} above ${LO}</span>`)+(off>0?`<span class="chip g">${off}% below highest</span>`:"");
   return`<div class="deal"><div class="dl-top"><div><div class="dl-k">Best price now</div><div class="dl-p">${$$(bp)}</div><div class="dl-s">at ${esc(bs)}</div></div><div class="chips">${chips}</div></div>
-  ${span>0?`<div class="rng"><div class="rng-t"><i style="left:${pos}%"></i></div><div class="rng-l"><div><span>${LIVE?"Lowest seen":"Lowest ever"}</span><b class="lo">${$$(n.lo)}</b><em>found at <a ${hr(n.loS,i.name)}>${esc(n.loS)}</a></em></div><div class="r"><span>${LIVE?"Highest seen":"Highest ever"}</span><b class="hi">${$$(n.hi)}</b><em>${n.hiS?"at "+esc(n.hiS):""}</em></div></div></div>`:""}
-  ${histChart(yr12(i.hist),1)}${chart(n.m,i.name,1)}
-  <a class="buy" ${hr(bs,i.name)}>Open cheapest: ${esc(bs)} ${$$(bp)} →</a>
+  ${span>0?`<div class="rng"><div class="rng-t"><i style="left:${pos}%"></i></div><div class="rng-l"><div><span>${LIVE?"Lowest seen":"Lowest ever"}</span><b class="lo">${$$(n.lo)}</b><em>found at <a ${hr(n.loS,i.name,i.links)}>${esc(n.loS)}</a></em></div><div class="r"><span>${LIVE?"Highest seen":"Highest ever"}</span><b class="hi">${$$(n.hi)}</b><em>${n.hiS?"at "+esc(n.hiS):""}</em></div></div></div>`:""}
+  ${histChart(yr12(i.hist),1)}${chart(n.m,i.name,1,i.links)}
+  <a class="buy" ${hr(bs,i.name,i.links)||`aria-disabled="true" style="opacity:.55"`}>${hr(bs,i.name,i.links)?"Open cheapest":"No link for"}: ${esc(bs)} ${$$(bp)}${hr(bs,i.name,i.links)?" →":""}</a>
   ${n.chg?`<div class="chg ${n.chg<0?"dn":"up"}">${n.chg<0?"▼ Price dropped ":"▲ Price increased "}${$$(Math.abs(n.chg))} (${Math.abs(n.chg/n.prev.p*100).toFixed(1)}%) since the previous logged price</div>`:""}
   <div class="sub">${LIVE?"Pulled":"Estimated"} ${fmtAt(i.at||n.cur.t||Date.now())}${LIVE?" from store APIs":" · not live"}</div></div>`})():`<div class="sub" style="margin:10px 0">No price yet.</div>`;
   const seenAt="";
@@ -258,7 +258,7 @@ $("add").onclick=doAdd;$("f").onsubmit=e=>{e.preventDefault();doAdd()};
 $("f").addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.tagName==="INPUT"){e.preventDefault();doAdd()}});
 function addItem(){const p=parseFloat($("p").value);
  const o={id:Date.now(),name:$("n").value.trim(),why:$("y").value.trim(),url:(/^https?:\/\//i.test($("u").value.trim())?$("u").value.trim():""),target:parseFloat($("t").value)||0,st:"watch",prices:isNaN(p)?[]:[{p,s:$("s").value,t:Date.now()}]};
- if(look){o.hiAll=+look.allTimeHigh||0;o.loAll=+look.allTimeLow||0;o.loWhere=look.lowStore||"";o.hiWhere=look.highStore||"";o.stores=(look.stores||[]).map(x=>({store:String(x.store),price:+x.price})).filter(x=>x.price>0);o.tip=look.tip||"";o.img=look.icon||"";o.at=look.at||Date.now();o.desc=look.description||"";o.hist=look.history||[]}
+ if(look){o.hiAll=+look.allTimeHigh||0;o.loAll=+look.allTimeLow||0;o.loWhere=look.lowStore||"";o.hiWhere=look.highStore||"";o.stores=(look.stores||[]).map(x=>({store:String(x.store),price:+x.price})).filter(x=>x.price>0);o.tip=look.tip||"";o.img=look.icon||"";o.at=look.at||Date.now();o.links=look.links||{};o.desc=look.description||"";o.hist=look.history||[]}
  if(!o.name)return;L.items.unshift(o);look=null;$("f").reset();$("u").value="";$("pv").innerHTML="";syncLink();$("det").hidden=true;tab="watch";save()};
 document.addEventListener("click",async e=>{const t=e.target.closest("[data-tab],[data-a]");if(!t)return;
  if(t.dataset.tab){tab=t.dataset.tab;return render()}
