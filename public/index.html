@@ -121,6 +121,7 @@ form.add{padding:12px}.stats{gap:6px}.stat{padding:8px 10px}
 </main>
 <script>
 /* Hosted (Vercel) mode: no Claude runtime, so prices come from /api/prices (store APIs). */
+const newCode=()=>{try{const a="abcdefghjkmnpqrstuvwxyz23456789",b=crypto.getRandomValues(new Uint8Array(10));return Array.from(b,x=>a[x%a.length]).join("")}catch(e){return Math.random().toString(36).slice(2,12)}};
 const LIVE=!window.claude,LO=LIVE?"lowest seen":"lowest ever";if(LIVE)document.addEventListener("DOMContentLoaded",()=>{const e=document.getElementById("lt");if(e)e.textContent="Lowest price seen"});
 const DIRECT=(()=>{try{return JSON.parse(localStorage.getItem("bfp2:direct")||"{}")}catch(e){return{}}})();
 const saveDirect=()=>{try{localStorage.setItem("bfp2:direct",JSON.stringify(DIRECT))}catch(e){}};
@@ -168,18 +169,39 @@ const cl=d=>d==null?d:JSON.parse(JSON.stringify(d));
 const dbB=db=>({shared:true,get:async p=>{const s=await db.doc(p).get();return s.exists?cl(s.data()):null},set:(p,d)=>db.doc(p).set(cl(d)),del:p=>db.doc(p).delete(),watch:(p,cb)=>db.doc(p).onSnapshot(s=>cb(s.exists?cl(s.data()):null))});
 const locB=()=>{const ls={};const rd=p=>{try{return JSON.parse(localStorage.getItem("bfp2:"+p))}catch(e){return null}};
  return{shared:false,del:async p=>{try{localStorage.removeItem("bfp2:"+p)}catch(e){}},get:async p=>rd(p),set:async(p,d)=>{try{localStorage.setItem("bfp2:"+p,JSON.stringify(d))}catch(e){}(ls[p]||[]).forEach(f=>f(d))},watch:(p,cb)=>{(ls[p]=ls[p]||[]).push(cb);cb(rd(p));return()=>{ls[p]=ls[p].filter(f=>f!==cb)}}}};
+const apiB=loc=>{const last={},lsn={};
+ const isSh=p=>p.startsWith("shared/"),cd=p=>encodeURIComponent(p.slice(7));
+ const shape=j=>({name:j.name,items:Array.isArray(j.items)?j.items:[],rev:Number.MAX_SAFE_INTEGER});
+ const post=async body=>{const r=await fetch("/api/list",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));if(!r.ok){const e=new Error(j.error||"Couldn't reach the shared list ("+r.status+")");e.code=r.status;throw e}return j};
+ return{shared:true,
+  get:async p=>{if(!isSh(p))return loc.get(p);const r=await fetch("/api/list?code="+cd(p));if(r.status===404)return null;if(!r.ok){const j=await r.json().catch(()=>({}));throw new Error(j.error||"Couldn't reach the shared list")}const d=shape(await r.json());last[p]=d;return cl(d)},
+  set:async(p,d)=>{if(!isSh(p))return loc.set(p,d);const prev=last[p];let j;
+   if(!prev)j=await post({code:p.slice(7),op:"create",name:d.name,items:d.items});
+   else{const ops=[],pm=new Map(prev.items.map(i=>[String(i.id),JSON.stringify(i)])),nm=new Set();
+    d.items.forEach(i=>{const k=String(i.id);nm.add(k);if(pm.get(k)!==JSON.stringify(i))ops.push({t:"put",item:i})});
+    prev.items.forEach(i=>{if(!nm.has(String(i.id)))ops.push({t:"del",id:i.id})});
+    if(d.name&&d.name!==prev.name)ops.push({t:"name",name:d.name});
+    if(!ops.length)return;j=await post({code:p.slice(7),ops})}
+   const st=shape(j);last[p]=st;(lsn[p]||[]).forEach(f=>f(cl(st)))},
+  del:async p=>{if(!isSh(p))return loc.del(p)},
+  watch:(p,cb)=>{if(!isSh(p))return loc.watch(p,cb);(lsn[p]=lsn[p]||[]).push(cb);let stop=false,tm,lastS="";
+   const tick=async()=>{if(stop)return;if(!document.hidden&&!busy){try{const r=await fetch("/api/list?code="+cd(p));
+     if(r.ok){const st=shape(await r.json()),str=JSON.stringify(st);if(!busy){last[p]=st;if(str!==lastS){lastS=str;cb(cl(st))}}}
+     else if(r.status===404&&lastS!=="gone"){lastS="gone";cb(null)}}catch(e){}}
+    tm=setTimeout(tick,document.hidden?15000:8000)};
+   tick();return()=>{stop=true;clearTimeout(tm);lsn[p]=(lsn[p]||[]).filter(f=>f!==cb)}}}};
 const hr=(st,n,lk)=>{const u=(lk&&/^https:\/\//.test(lk[st]||"")&&lk[st])||lnk(st,n);return u?`href="${u}" target="_blank" rel="noopener"`:""};
 const lnk=(st,n)=>DIRECT[st+"|"+n]||(SEARCH[st]?SEARCH[st](encodeURIComponent(n)):"");
 const idxP=()=>"data/users/"+uid+"/index";
 const pathOf=l=>l.s?"shared/"+l.id:"data/users/"+uid+"/l"+l.id;
 const saveIdx=()=>B.set(idxP(),idx).catch(()=>{});
 let busy=0,col={};try{col=JSON.parse(localStorage.getItem("bfpc")||"{}")||{}}catch(e){col={}}
-const save=()=>{try{render()}catch(e){ask("Display problem: "+(e&&e.message||e),{cancel:0})}L.rev=Date.now();busy++;let d;try{d=JSON.parse(JSON.stringify(L))}catch(e){d=L}B.set(pathOf(cur),d).catch(e=>ask("Couldn't save ("+((e&&(e.message||e.code))||"unknown")+"). You may only have view access to this page.",{cancel:0})).finally(()=>{busy--})};
+const save=()=>{try{render()}catch(e){ask("Display problem: "+(e&&e.message||e),{cancel:0})}L.rev=Date.now();busy++;let d;try{d=JSON.parse(JSON.stringify(L))}catch(e){d=L}B.set(pathOf(cur),d).catch(e=>ask("Couldn't save ("+((e&&(e.message||e.code))||"unknown")+"). Check your connection and try again.",{cancel:0})).finally(()=>{busy--})};
 async function boot(){
  let db=null,u=null;const t=()=>new Promise(r=>setTimeout(()=>r(null),4000));
  try{if(window.claude){[db,u]=await Promise.all([Promise.race([claude.use("db"),t()]),Promise.race([claude.use("user"),t()])]);if(db&&u){const i=await u.id();if(i)uid=i;else db=null}}}catch(e){db=null}
- B=db?dbB(db):locB();
- $("who").textContent=db?"Private lists are yours alone. Shared lists sync live with everyone who joins with the code.":"Offline mode: saved in this browser only. Sharing needs the signed-in version.";
+ B=db?dbB(db):LIVE?apiB(locB()):locB();
+ $("who").textContent=db||LIVE?"Private lists stay in this browser. A shared list syncs with everyone who joins with its code.":"Offline mode: saved in this browser only. Sharing needs the signed-in version.";
  try{idx=(await B.get(idxP()))||{lists:[]}}catch(e){}
  if(!idx.lists.length){idx.lists.push({id:"main",name:"My list"});saveIdx()}
  open(idx.lists[0].id)}
@@ -198,12 +220,14 @@ $("dl").onclick=async()=>{const gone=cur,sh=!!gone.s;
 $("sh").onclick=async()=>{if(!B.shared)return ask("Sharing needs the signed-in version of this page.",{cancel:0});
  if(cur.s)return ask("Give this code to the people you want on the list. They tap Join and paste it:",{input:1,val:cur.id,cancel:0});
  if(!await ask("Share this list? Anyone with the code can see and edit it.",{ok:"Share"}))return;
- const code=Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4);
- await B.set("shared/"+code,L);cur.id=code;cur.s=1;saveIdx();open(code);ask("Share this code. They tap Join and paste it:",{input:1,val:code,cancel:0})};
+ const code=newCode();
+ try{await B.set("shared/"+code,L)}catch(e){return ask(e.message||"Couldn't share this list.",{cancel:0})}
+ cur.id=code;cur.s=1;saveIdx();open(code);ask("Share this code. They tap Join and paste it:",{input:1,val:code,cancel:0})};
 $("jn").onclick=async()=>{if(!B.shared)return ask("Joining needs the signed-in version of this page.",{cancel:0});
- const c=((await ask("Paste the share code:",{input:1,ok:"Join"}))||"").trim();if(!c)return;
+ const c=((await ask("Paste the join code:",{input:1,ok:"Join"}))||"").trim().toLowerCase();if(!c)return;
  if(idx.lists.some(l=>l.id===c))return open(c);
- const d=await B.get("shared/"+c);if(!d)return ask("No list found for that code.",{cancel:0});
+ let d;try{d=await B.get("shared/"+c)}catch(e){return ask(e.message||"Couldn't reach the shared list.",{cancel:0})}
+ if(!d)return ask("No list found for that code.",{cancel:0});
  idx.lists.push({id:c,name:d.name||"Shared list",s:1});saveIdx();open(c)};
 function info(i){const pr=i.prices||[],cur=pr[pr.length-1];if(!cur)return null;
  const ps=pr.map(x=>x.p);let lo=Math.min(...ps),hi=Math.max(...ps),loS=[...pr].reverse().find(x=>x.p===lo).s,hiS=[...pr].reverse().find(x=>x.p===hi).s;
