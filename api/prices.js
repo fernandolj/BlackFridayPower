@@ -71,23 +71,78 @@ async function call(path, params, apiKey, dbg, name) {
   }
 }
 
+
+// Turn one raw offer into {store, title, price, url}. Needs a store, a price and a direct link.
+function makeOffer(o, parent) {
+  if (!o || typeof o !== "object") return null;
+  const store = storeName(o.store_name || parent.store_name);
+  const price = money(o.price != null ? o.price : parent.price);
+  const url = offerLink(o, store) || offerLink(parent, store);
+  if (!store || !price || !url) return null;
+  const photo = Array.isArray(parent.product_photos) ? parent.product_photos[0] : parent.product_photo;
+  return { store, title: parent.product_title || o.offer_title || "", price, url, image: httpUrl(photo) };
+}
+// Find the list of offers (objects with a store_name) wherever it sits in a reply.
+function findOffers(j, depth = 0) {
+  if (!j || typeof j !== "object" || depth > 4) return [];
+  if (Array.isArray(j)) return j.length && j[0] && typeof j[0] === "object" && "store_name" in j[0] ? j : [];
+  for (const k of Object.keys(j)) {
+    const r = findOffers(j[k], depth + 1);
+    if (r.length) return r;
+  }
+  return [];
+}
+
 const providers = {
-  // One search returns products from many stores; keep the best-ranked match per store.
+  // Step 1: search for the product. Step 2: ask for every store's offer on the top match, so big
+  // stores (Best Buy, Walmart, Target...) show up even when the search lists only one store per product.
   async stores(q, dbg) {
     const k = key("OPENWEBNINJA_PRODUCT_KEY");
     if (!k) return null;
     const body = await call("/realtime-product-search/v2/search", { q, country: "us", language: "en" }, k, dbg, "productSearch");
-    const seen = new Set(), out = [];
-    for (const it of listOf(body)) {
+    const results = listOf(body);
+
+    const fromSearch = [], seenS = new Set();
+    for (const it of results) {
       const o = it.offer || (Array.isArray(it.offers) && it.offers[0]) || it;
-      const store = storeName(o.store_name || it.store_name);
-      const link = offerLink(o, store) || offerLink(it, store);
-      const price = money(o.price != null ? o.price : it.price);
-      if (!store || !price || seen.has(store)) continue;
-      if (!link) continue; // only keep stores that give a direct link to the product
-      seen.add(store);
-      const photo = Array.isArray(it.product_photos) ? it.product_photos[0] : it.product_photo;
-      out.push({ store, title: it.product_title || o.offer_title || "", price, url: link, image: httpUrl(photo) });
+      const o2 = makeOffer(o, it);
+      if (o2 && !seenS.has(o2.store)) { seenS.add(o2.store); o2.pid = it.product_id || ""; fromSearch.push(o2); }
+    }
+
+    const top = results.find((x) => x && (x.product_id || (x.product && x.product.product_id)));
+    const pid = top && (top.product_id || top.product.product_id);
+    let fromOffers = [];
+    if (pid) {
+      const tried = [];
+      for (const path of ["/realtime-product-search/v2/product-offers", "/realtime-product-search/v2/product-details"]) {
+        try {
+          const b = await call(path, { product_id: pid, country: "us", language: "en" }, k, null, "");
+          const list = findOffers(b);
+          tried.push({ path, http: 200, offers: list.length, offerKeys: list[0] ? Object.keys(list[0]).slice(0, 30) : null });
+          const best = new Map();
+          for (const o of list) {
+            const o2 = makeOffer(o, {});
+            if (o2 && (!best.has(o2.store) || o2.price < best.get(o2.store).price)) best.set(o2.store, o2);
+          }
+          fromOffers = [...best.values()];
+          if (fromOffers.length) break;
+        } catch (e) {
+          tried.push({ path, error: String(e.message).slice(0, 40) });
+        }
+      }
+      if (dbg) dbg.productOffers = { productId: !!pid, tried, kept: fromOffers.map((x) => x.store) };
+    } else if (dbg) dbg.productOffers = { productId: false };
+
+    // Offers for the exact product beat loose search matches, which can be other models or bundles.
+    let out = fromOffers;
+    if (fromOffers.length) {
+      // also keep search matches that are the very same product
+      const have = new Set(fromOffers.map((x) => x.store));
+      out = fromOffers.concat(fromSearch.filter((x) => x.pid && x.pid === pid && !have.has(x.store)));
+    } else out = fromSearch;
+    if (top) {
+      const photo = Array.isArray(top.product_photos) ? top.product_photos[0] : top.product_photo;
+      out.forEach((x) => { if (!x.image) x.image = httpUrl(photo); if (!x.title) x.title = top.product_title || ""; });
     }
     return out;
   },
@@ -102,7 +157,7 @@ const providers = {
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
-  const q = String((req.query && req.query.q) || "").trim().slice(0, 120);
+  const q = String((req.query && req.query.q) || "").replace(/[®™©]/g, " ").replace(/\s+/g, " ").trim().slice(0, 120);
   if (q.length < 2) return res.status(400).json({ error: "Missing q" });
   const dbg = req.query && req.query.debug ? {} : null;
   if (dbg) dbg.envNamesSeen = Object.keys(process.env).filter((k) => /openweb|ninja/i.test(k)); // names only, never values
