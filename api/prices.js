@@ -14,13 +14,32 @@ const money = (v) => {
   return Number.isFinite(n) && n > 0 && n < 100000 ? Math.round(n * 100) / 100 : 0;
 };
 const httpUrl = (u) => (typeof u === "string" && /^https:\/\//i.test(u) ? u : "");
-const KNOWN = [["best buy", "Best Buy"], ["walmart", "Walmart"], ["target", "Target"], ["amazon", "Amazon"], ["ebay", "eBay"], ["newegg", "Newegg"], ["b&h", "B&H"], ["bhphoto", "B&H"], ["apple", "Apple"], ["costco", "Costco"], ["home depot", "Home Depot"], ["lowe", "Lowe's"], ["gamestop", "GameStop"], ["macy", "Macy's"], ["kohl", "Kohl's"], ["wayfair", "Wayfair"]];
+const KNOWN = [["best buy", "Best Buy"], ["walmart", "Walmart"], ["target", "Target"], ["amazon", "Amazon"], ["ebay", "eBay"], ["newegg", "Newegg"], ["b&h", "B&H"], ["bhphoto", "B&H"], ["apple", "Apple"], ["costco", "Costco"], ["home depot", "Home Depot"], ["lowe", "Lowe's"], ["sam's club", "Sam's Club"], ["micro center", "Micro Center"], ["dell", "Dell"], ["gamestop", "GameStop"], ["macy", "Macy's"], ["kohl", "Kohl's"], ["wayfair", "Wayfair"]];
 const storeName = (s) => {
   const t = String(s || "").trim();
   const l = t.toLowerCase();
   for (const [k, v] of KNOWN) if (l.includes(k)) return v;
   return t.slice(0, 40);
 };
+
+// Find the store's own product page. Try the known field names first, then any other
+// field named like a url or link (skipping images, reviews and Google pages).
+function offerLink(o, store) {
+  if (!o || typeof o !== "object") return "";
+  for (const k of ["offer_page_url", "offer_url", "url", "link", "product_url", "merchant_url"]) {
+    const u = httpUrl(o[k]);
+    if (u && !/(^|\.)google\./i.test(new URL(u).hostname)) return u;
+  }
+  for (const k of Object.keys(o)) {
+    if (!/url|link/i.test(k) || /photo|image|thumb|video|review|rating|logo|icon|shipping|return|policy|terms|store|merchant|seller|google/i.test(k)) continue;
+    const u = httpUrl(o[k]);
+    if (!u) continue;
+    const host = new URL(u).hostname.toLowerCase().replace(/[^a-z0-9]/g, "");
+    const want = String(store || "").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5);
+    if (!/google/.test(host) && (!want || host.includes(want))) return u; // fallback scan: the page must be on that store's own site
+  }
+  return "";
+}
 const key = (specific) => process.env[specific] || process.env.OPENWEBNINJA_API_KEY || "";
 
 // The docs were not machine-readable when this was written, so find the result list wherever it sits.
@@ -62,11 +81,12 @@ const providers = {
     for (const it of listOf(body)) {
       const o = it.offer || (Array.isArray(it.offers) && it.offers[0]) || it;
       const store = storeName(o.store_name || it.store_name);
+      const link = offerLink(o, store) || offerLink(it, store);
       const price = money(o.price != null ? o.price : it.price);
       if (!store || !price || seen.has(store)) continue;
       seen.add(store);
       const photo = Array.isArray(it.product_photos) ? it.product_photos[0] : it.product_photo;
-      out.push({ store, title: it.product_title || o.offer_title || "", price, url: httpUrl(o.offer_page_url || o.offer_url || o.url), image: httpUrl(photo) });
+      out.push({ store, title: it.product_title || o.offer_title || "", price, url: link, image: httpUrl(photo) });
     }
     return out;
   },
