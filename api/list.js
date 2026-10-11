@@ -8,6 +8,7 @@
 // so look for any variable that ends the right way instead of one exact name.
 const envKeys = Object.keys(process.env);
 const pick = (re) => { const k = envKeys.filter((x) => re.test(x) && !/READ_ONLY/i.test(x)).sort()[0]; return k ? process.env[k] : ""; };
+const { requireUser } = require("../lib/auth.js");
 const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || pick(/(KV_REST_API_URL|REDIS_REST_URL)$/i);
 const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || pick(/(KV_REST_API_TOKEN|REDIS_REST_TOKEN)$/i);
 const TTL = 60 * 60 * 24 * 400; // lists expire after ~400 days without changes
@@ -68,6 +69,7 @@ module.exports = async (req, res) => {
     if (URL_ && TOKEN) { try { await redis([["PING"]]); ping = "ok"; } catch (e) { ping = "failed: " + String(e.message).slice(0, 60); } }
     return res.status(200).json({ storageUrlFound: !!URL_, storageTokenFound: !!TOKEN, ping, envNamesSeen: envKeys.filter((k) => /redis|kv_|upstash|storage/i.test(k)) });
   }
+  if (!(await requireUser(req, res))) return; // members only
   if (!URL_ || !TOKEN) return res.status(503).json({ error: "Sharing isn't set up on this site yet (no storage connected)." });
   try {
     if (req.method === "GET") {

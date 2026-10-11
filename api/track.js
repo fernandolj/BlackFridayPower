@@ -4,9 +4,11 @@
 const { lookup, cleanQuery } = require("../lib/prices-core.js");
 const { redis, normKey, today, readSeries, recordToday, MAX_TRACKED } = require("../lib/track.js");
 const { configured } = require("../lib/redis.js");
+const { requireUser } = require("../lib/auth.js");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  if (!(await requireUser(req, res, req.method === "POST" ? { limit: ["track", 30, 3600] } : {}))) return;
   if (!configured) return res.status(503).json({ error: "Price tracking needs the Upstash Redis storage connected." });
   try {
     if (req.method === "GET") {

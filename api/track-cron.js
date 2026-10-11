@@ -6,8 +6,10 @@ const { configured } = require("../lib/redis.js");
 
 module.exports = async (req, res) => {
   res.setHeader("Cache-Control", "no-store");
+  // Only Vercel's scheduler may run this. It needs a CRON_SECRET environment variable; Vercel then sends it automatically.
   const secret = process.env.CRON_SECRET;
-  if (secret && req.headers.authorization !== "Bearer " + secret) return res.status(401).json({ error: "Not allowed" });
+  if (!secret || secret.length < 16) return res.status(503).json({ error: "Set a CRON_SECRET environment variable (16+ random characters) to turn on daily tracking." });
+  if (req.headers.authorization !== "Bearer " + secret) return res.status(401).json({ error: "Not allowed" });
   if (!configured) return res.status(503).json({ error: "No storage connected." });
   const started = Date.now();
   try {

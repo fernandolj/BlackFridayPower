@@ -44,7 +44,17 @@ button:hover{border-color:var(--ac)}button.p{background:var(--ac);color:#1b130a;
 @media(max-width:520px){.grid{grid-template-columns:repeat(2,1fr)}.stats b{font-size:17px}}
 .bar{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}.bar select{flex:1;min-width:140px;width:auto}.row2{display:flex;gap:8px}.why{font-size:13px;color:var(--ac);margin:2px 0}.est{font-style:italic;margin-top:6px}
 .grid small{display:block;font-size:10px;letter-spacing:.06em;font-weight:600;color:var(--mut)}.grid i{display:block;font-style:normal;font-size:12px;color:var(--mut)}.grid i a{color:var(--ac)}.buy{display:inline-block;margin:2px 0 8px;background:var(--ac);color:#1b130a;font-weight:600;padding:8px 12px;border-radius:9px;text-decoration:none;font-size:13px}.chg{font-size:13px;font-weight:600;margin:4px 0}.chg.dn{color:var(--ok)}.chg.up{color:var(--bad)}.due{color:var(--ac)}.wb{font-size:12px;margin-top:6px;color:var(--mut)}.wb a{color:var(--tx);margin-right:10px}.wb a.l{color:var(--ok);font-weight:600}
-.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:9}.md{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:380px;width:100%}.md p{margin:0 0 10px;white-space:pre-wrap}.md .row{justify-content:flex-end;margin-top:10px}
+
+.gate{position:fixed;inset:0;z-index:20;background:var(--bg);display:flex;align-items:flex-start;justify-content:center;padding:32px 16px;overflow:auto}.gate[hidden],.mem[hidden]{display:none}
+.gcard{width:100%;max-width:380px}.gcard h2{margin:0 0 4px;font-size:26px}.gcard h2 span{color:var(--ac)}.gcard .sub{margin:0 0 16px}
+.gtabs{display:flex;gap:8px;margin:0 0 14px}.gtabs button{flex:1}.gtabs button.on{background:var(--ac);color:#1b130a;border-color:var(--ac);font-weight:600}
+.gcard label{display:block;margin:0 0 12px;font-size:13px;color:var(--mut)}.gcard label input{margin-top:5px;color:var(--tx)}.gcard .gs{width:100%;margin-top:4px}
+.gmsg{min-height:20px;margin:0 0 10px;font-size:14px}.gmsg.bad{color:var(--bad)}.gmsg.ok{color:var(--ok)}.hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+.mem{position:fixed;inset:0;z-index:15;background:var(--bg);overflow:auto;padding:20px 16px}.mem .in{max-width:640px;margin:0 auto}.mem h2{margin:0 0 4px}
+.mrow{border:1px solid var(--line);background:var(--card);border-radius:12px;padding:12px;margin:0 0 10px}.mrow b{display:block}.mrow .sub{margin:2px 0 8px;word-break:break-word}.mrow .mb{display:flex;gap:8px;flex-wrap:wrap}.mrow .mb button{flex:1 1 auto}
+.mrow .tag{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--mut);font-weight:600}.mrow .tag.pending{color:var(--ac)}.mrow .tag.approved{color:var(--ok)}
+#acct{align-items:center}#acct .sub{flex:1 1 100%;margin:0}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:center;justify-content:center;padding:16px;z-index:30}.md{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;max-width:380px;width:100%}.md p{margin:0 0 10px;white-space:pre-wrap}.md .row{justify-content:flex-end;margin-top:10px}
 .facts{margin:12px 0;border:1px solid var(--line);border-radius:10px;overflow:hidden}.facts>div{display:grid;grid-template-columns:1.3fr 1fr 1.2fr;gap:8px;padding:9px 10px;border-bottom:1px solid var(--line);align-items:baseline}.facts>div:last-child{border:0}.facts span{color:var(--mut);font-size:13px;font-weight:600}.facts b{font-size:17px}.facts em{font-style:normal;font-size:13px;color:var(--mut)}.facts em a{color:var(--ac)}.facts .hi b{color:var(--bad)}.facts .lo b{color:var(--ok)}
 .ch{margin:12px 0}.ch h4{margin:0 0 6px;font-size:14px}.bar1{display:grid;grid-template-columns:86px 1fr 74px;gap:8px;align-items:center;margin:4px 0;font-size:13px}.trk{background:var(--bg);border-radius:6px;height:16px;overflow:hidden}.trk i{display:block;height:100%;background:var(--mut);opacity:.5}.bar1.low .trk i{background:var(--ok);opacity:1}.bar1.low b{color:var(--ok)}.ch small{color:var(--mut)}
 form.add label,.lb{display:flex;flex-direction:column;gap:4px;font-size:12px;font-weight:600;color:var(--mut)}.row2{align-items:flex-end}.row2 label{flex:1}.row{align-items:flex-end}
@@ -94,6 +104,14 @@ form.add{padding:12px}.stats{gap:6px}.stat{padding:8px 10px}
 .hlo{fill:var(--ok);stroke:var(--card);stroke-width:2}.hhi{fill:var(--bad);stroke:var(--card);stroke-width:2}.hnow{fill:var(--tx);stroke:var(--card);stroke-width:2}
 .ht{font-size:10px;fill:var(--mut);font-family:inherit;font-variant-numeric:tabular-nums}.ht.lo{fill:var(--ok);font-weight:700}.ht.hi{fill:var(--bad);font-weight:700}
 </style></head><body><main>
+<div class="gate" id="gate" hidden><div class="gcard">
+<h2>Black Friday <span>Power</span></h2><div class="sub">Members only. Ask for access and you can sign in once it's approved.</div>
+<div class="gtabs"><button type="button" id="gt1" class="on">Sign in</button><button type="button" id="gt2">Request access</button></div>
+<div class="gmsg" id="gmsg" role="status"></div>
+<form id="g1" novalidate><label>Email<input id="ge" type="email" autocomplete="username" inputmode="email"></label><label>Password<input id="gp" type="password" autocomplete="current-password"></label><button class="p gs" type="submit">Sign in</button></form>
+<form id="g2" novalidate hidden><label>Your name<input id="rn" autocomplete="name" maxlength="60"></label><label>Email<input id="re" type="email" autocomplete="email" inputmode="email"></label><label>Choose a password (10+ characters)<input id="rp" type="password" autocomplete="new-password"></label><label>Why do you want access? (optional)<input id="rw" maxlength="200"></label><input class="hp" id="rh" tabindex="-1" autocomplete="off" aria-hidden="true"><button class="p gs" type="submit">Request access</button></form>
+</div></div>
+<div class="mem" id="mem" hidden><div class="in"><h2>Members</h2><div class="sub" id="mhint">People who asked for access appear here. Approve them so they can sign in.</div><div id="mlist"></div><button type="button" id="mx" class="gs" style="margin-top:6px">Close</button></div></div>
 <header><div><h1>Black Friday <span>Power</span></h1><div class="sub">Wait for the lowest price. Then buy.</div></div>
 <div class="cd"><b id="days">–</b><span class="sub">days to Black Friday</span></div></header>
 <div class="stats"><div class="stat"><b id="s1">$0</b><small>Watch list total</small></div><div class="stat"><b id="s2">$0</b><small>Buy list total</small></div><div class="stat"><b id="s3">$0</b><small>Bought list total</small></div></div>
@@ -117,6 +135,7 @@ form.add{padding:12px}.stats{gap:6px}.stat{padding:8px 10px}
 </div>
 <button class="p w" type="button" id="add">Add to list</button></form>
 <div class="tabs" id="tabs"></div><div id="list"></div>
+<div class="foot" id="acct" hidden><div class="sub" id="me"></div><button id="mb" hidden>Members</button><button id="out">Sign out</button></div>
 <div class="foot"><button id="ex">Copy backup</button><button id="im">Restore backup</button><button id="nt">Enable alerts</button></div>
 </main>
 <script>
@@ -328,5 +347,45 @@ $("ex").onclick=async()=>{const s=JSON.stringify(L.items);try{await navigator.cl
 $("im").onclick=async()=>{const s=await ask("Paste a backup to restore into this list:",{input:1,ok:"Restore"});if(!s)return;try{const a=JSON.parse(s);if(Array.isArray(a)){L.items=a;save()}}catch(e){ask("That backup could not be read.",{cancel:0})}};
 $("nt").onclick=async()=>{try{const r=await Notification.requestPermission();$("nt").textContent=r==="granted"?"Alerts on":"Alerts blocked"}catch(e){$("nt").textContent="Not supported here"}};
 window.addEventListener("error",e=>ask("Something went wrong: "+e.message,{cancel:0}));
-boot();
+/* ---- accounts (hosted only): the server enforces this; the page just shows the right screen ---- */
+const ME={u:null};let booted=false;
+if(LIVE){const _f=window.fetch.bind(window);window.fetch=async(u,o)=>{const api=String(u).startsWith("/api/");o=o||{};if(api){o.headers=Object.assign({"x-bfp":"1"},o.headers||{});o.credentials="same-origin"}
+ const r=await _f(u,o);if(api&&r.status===401&&!String(u).startsWith("/api/auth")&&ME.u)showGate("Your session ended. Please sign in again.");return r}}
+const gmsg=(m,k)=>{const e=document.getElementById("gmsg");e.textContent=m||"";e.className="gmsg"+(k?" "+k:"")};
+function showGate(m,k){ME.u=null;document.getElementById("gate").hidden=false;gmsg(m||"",k||"bad")}
+function gTab(n){document.getElementById("g1").hidden=n!==1;document.getElementById("g2").hidden=n!==2;document.getElementById("gt1").classList.toggle("on",n===1);document.getElementById("gt2").classList.toggle("on",n===2);gmsg("")}
+async function authPost(body){const r=await fetch("/api/auth",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body)});const j=await r.json().catch(()=>({}));return{ok:r.ok,j}}
+function signedIn(u){const first=!booted;if(ME.u&&ME.u.email!==u.email){location.reload();return}
+ ME.u=u;document.getElementById("gate").hidden=true;
+ uid=u.email.replace(/[^a-z0-9]/g,"_").slice(0,60);
+ try{const o="bfp2:data/users/me/",n="bfp2:data/users/"+uid+"/";if(!localStorage.getItem(n+"index")&&localStorage.getItem(o+"index"))Object.keys(localStorage).filter(k=>k.startsWith(o)).forEach(k=>localStorage.setItem(n+k.slice(o.length),localStorage.getItem(k)))}catch(e){}
+ document.getElementById("acct").hidden=false;document.getElementById("me").textContent="Signed in as "+(u.name||u.email);
+ const mb=document.getElementById("mb");mb.hidden=u.role!=="admin";if(u.role==="admin")pendingBadge();
+ if(first){booted=true;boot()}}
+async function startApp(){try{const r=await fetch("/api/auth"),j=await r.json().catch(()=>({}));
+ if(r.ok&&j.user)return signedIn(j.user);
+ showGate(j.setup?j.error:"","bad")}catch(e){showGate("Couldn't reach the site. Check your connection and reload.","bad")}}
+document.getElementById("gt1").onclick=()=>gTab(1);document.getElementById("gt2").onclick=()=>gTab(2);
+document.getElementById("g1").addEventListener("submit",async e=>{e.preventDefault();gmsg("Signing in…","ok");
+ const {ok,j}=await authPost({op:"login",email:document.getElementById("ge").value,password:document.getElementById("gp").value});
+ if(ok&&j.user){document.getElementById("gp").value="";signedIn(j.user)}else gmsg(j.error||"Couldn't sign in.","bad")});
+document.getElementById("g2").addEventListener("submit",async e=>{e.preventDefault();gmsg("Sending…","ok");
+ const {ok,j}=await authPost({op:"request",name:document.getElementById("rn").value,email:document.getElementById("re").value,password:document.getElementById("rp").value,note:document.getElementById("rw").value,website:document.getElementById("rh").value});
+ if(ok){document.getElementById("g2").reset();gTab(1);gmsg("Request sent. You can sign in once the owner approves it.","ok")}else gmsg(j.error||"Couldn't send the request.","bad")});
+document.getElementById("out").onclick=async()=>{await authPost({op:"logout"});location.reload()};
+async function loadMembers(){const r=await fetch("/api/admin"),j=await r.json().catch(()=>({}));const box=document.getElementById("mlist");
+ if(!r.ok){box.innerHTML='<div class="sub">'+esc(j.error||"Couldn't load members.")+"</div>";return}
+ const us=j.users||[],pend=us.filter(u=>u.status==="pending").length;document.getElementById("mb").textContent=pend?"Members ("+pend+" waiting)":"Members";
+ const btn=(a,l,e,cls)=>'<button type="button" class="'+(cls||"")+'" data-ma="'+a+'" data-em="'+esc(e)+'">'+l+"</button>";
+ box.innerHTML=us.length?us.map(u=>'<div class="mrow"><span class="tag '+esc(u.status)+'">'+esc(u.status)+"</span><b>"+esc(u.name||u.email)+'</b><div class="sub">'+esc(u.email)+(u.note?" · “"+esc(u.note)+"”":"")+(u.createdAt?" · requested "+esc(new Date(u.createdAt).toLocaleDateString()):"")+'</div><div class="mb">'+
+   (u.status==="approved"?btn("disable","Disable",u.email):btn("approve","Approve",u.email,"p"))+(u.status==="pending"?btn("deny","Deny",u.email):"")+btn("remove","Remove",u.email)+"</div></div>").join(""):'<div class="sub">No access requests yet.</div>'}
+async function pendingBadge(){try{const r=await fetch("/api/admin"),j=await r.json().catch(()=>({}));if(r.ok){const p=(j.users||[]).filter(u=>u.status==="pending").length;document.getElementById("mb").textContent=p?"Members ("+p+" waiting)":"Members"}}catch(e){}}
+document.getElementById("mb").onclick=()=>{document.getElementById("mem").hidden=false;loadMembers()};
+document.getElementById("mx").onclick=()=>{document.getElementById("mem").hidden=true;pendingBadge()};
+document.getElementById("mlist").addEventListener("click",async e=>{const b=e.target.closest("[data-ma]");if(!b)return;
+ if(b.dataset.ma==="remove"&&!await ask("Remove "+b.dataset.em+"? They'll need to request access again.",{ok:"Remove"}))return;
+ const r=await fetch("/api/admin",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({op:b.dataset.ma,email:b.dataset.em})});
+ if(!r.ok){const j=await r.json().catch(()=>({}));ask(j.error||"That didn't work.",{cancel:0})}loadMembers()});
+
+LIVE?startApp():boot();
 </script></body></html>
